@@ -36,27 +36,27 @@ sure to do this only off of commits on master; any other commits on any other
 branches will release `dev versions`_, which should be enough for testing
 pre-merge.
 
-.. |deployer| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/deployer&style=flat-square
+.. |deployer| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/deployer&style=flat-square&label=deployer
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/deployer
 
-.. |docker| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/docker&style=flat-square
+.. |docker| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/docker&style=flat-square&label=docker
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/docker
 
-.. |gcloud| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/gcloud&style=flat-square
+.. |gcloud| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/gcloud&style=flat-square&label=gcloud
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/gcloud
 
-.. |linter| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/linter&style=flat-square
+.. |linter| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/linter&style=flat-square&label=linter
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/linter
 
-.. |notifier| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/notifier&style=flat-square
+.. |notifier| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/notifier&style=flat-square&label=notifier
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/notifier
 
-.. |tester| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/tester&style=flat-square
+.. |tester| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/tester&style=flat-square&label=tester
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/tester
 
