@@ -18,18 +18,14 @@ workflows:
           name: lint-orbs-docker
           lint-dir: docker
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /docker-*/
+              only: /.*/
       - orb-tools/pack:
           name: pack-orbs-docker
           source-dir: docker
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /docker-*/
+              only: /.*/
           requires:
             - linter/pre-commit
             - lint-orbs-docker
@@ -38,10 +34,8 @@ workflows:
           name: publish-dev-orbs-docker
           orb-name: talkiq/docker
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /docker-*/
+              only: /.*/
           requires:
             - pack-orbs-docker
       - orb-tools/dev-promote-prod:
@@ -86,18 +80,14 @@ workflows:
           name: lint-orbs-gcloud
           lint-dir: gcloud
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /gcloud-*/
+              only: /.*/
       - orb-tools/pack:
           name: pack-orbs-gcloud
           source-dir: gcloud
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /gcloud-*/
+              only: /.*/
           requires:
             - linter/pre-commit
             - lint-orbs-gcloud
@@ -106,10 +96,8 @@ workflows:
           name: publish-dev-orbs-gcloud
           orb-name: talkiq/gcloud
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /gcloud-*/
+              only: /.*/
           requires:
             - pack-orbs-gcloud
       - orb-tools/dev-promote-prod:
@@ -154,18 +142,14 @@ workflows:
           name: lint-orbs-linter
           lint-dir: linter
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /linter-*/
+              only: /.*/
       - orb-tools/pack:
           name: pack-orbs-linter
           source-dir: linter
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /linter-*/
+              only: /.*/
           requires:
             - linter/pre-commit
             - lint-orbs-linter
@@ -174,10 +158,8 @@ workflows:
           name: publish-dev-orbs-linter
           orb-name: talkiq/linter
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /linter-*/
+              only: /.*/
           requires:
             - pack-orbs-linter
       - orb-tools/dev-promote-prod:
@@ -222,18 +204,14 @@ workflows:
           name: lint-orbs-notifier
           lint-dir: notifier
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /notifier-*/
+              only: /.*/
       - orb-tools/pack:
           name: pack-orbs-notifier
           source-dir: notifier
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /notifier-*/
+              only: /.*/
           requires:
             - linter/pre-commit
             - lint-orbs-notifier
@@ -242,10 +220,8 @@ workflows:
           name: publish-dev-orbs-notifier
           orb-name: talkiq/notifier
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /notifier-*/
+              only: /.*/
           requires:
             - pack-orbs-notifier
       - orb-tools/dev-promote-prod:
@@ -290,18 +266,14 @@ workflows:
           name: lint-orbs-tester
           lint-dir: tester
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /tester-*/
+              only: /.*/
       - orb-tools/pack:
           name: pack-orbs-tester
           source-dir: tester
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /tester-*/
+              only: /.*/
           requires:
             - linter/pre-commit
             - lint-orbs-tester
@@ -310,10 +282,8 @@ workflows:
           name: publish-dev-orbs-tester
           orb-name: talkiq/tester
           filters:
-            branches:
-              only: /.*/
             tags:
-              only: /tester-*/
+              only: /.*/
           requires:
             - pack-orbs-tester
       - orb-tools/dev-promote-prod:
