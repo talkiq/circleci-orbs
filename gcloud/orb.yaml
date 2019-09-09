@@ -149,5 +149,85 @@ jobs:
           image: <<parameters.project>>/<<parameters.image>>
           registry: <<parameters.registry>>
 
+  deploy-gke:
+    description: >
+      Deploy a given image in GCR to GKE. Can be used in a lightweight "only
+      update the image" mode if ``from_template`` is unset (which will then not
+      need to checkout the source code) or do a "full deployment" by using
+      ``./bin/interpolate-k8s`` to build a ``k8s.yaml`` file otherwise.
+    docker:
+      - image: google/cloud-sdk:alpine
+    parameters:
+      creds:
+        default: GCLOUD_SERVICE_KEY
+        description: >
+          Name of environment variable storing the base64-encoded service key
+          for the GCP project.
+        type: env_var_name
+      cluster:
+        type: string
+      deployment:
+        description: >
+          Name of deployment to-be-updated.
+        type: string
+      from_template:
+        default: false
+        description: >
+          If enabled, checks out the code and uses ``./bin/interpolate-k8s`` to
+          do a full deployment from the k8s yaml template. Otherwise, simply
+          updated the image hash of the deployment.
+        type: boolean
+      image:
+        default: ${CIRCLE_PROJECT_REPONAME}
+        description: >
+          Name of the target image. Note that this will be prepended by the
+          project name (eg. <<parameters.project>>), so the full path your
+          image will be pushed to will look like:
+          <<parameters.registry>>/<<parameters.project>>/<<parameters.image>>.
+        type: string
+      project:
+        description: >
+          Name of GCP project to which we will push.
+        type: string
+      registry:
+        default: 'gcr.io'
+        description: >
+          Container registry to-be-used.
+        type: string
+      zone:
+        type: string
+    steps:
+      - when:
+          condition: <<parameters.from_template>>
+          steps:
+            - checkout
+      - auth:
+          creds: <<parameters.creds>>
+          project: <<parameters.project>>
+      - configure-gke:
+          cluster: <<parameters.cluster>>
+          zone: <<parameters.zone>>
+      - run: mkdir -p /metadata/prev_version
+      - run:
+          name: store previous version
+          command: |
+            kubectl get deployment <<parameters.deployment>> -oyaml \
+                | awk '/image: / {split($0,img,":"); print img[3]}' > /metadata/prev_version/<<parameters.zone>> \
+                || echo 'unknown' > /metadata/prev_version/<<parameters.zone>>
+      - when:
+          condition: <<parameters.from_template>>
+          steps:
+            - run: python2 -m ensurepip
+            - run: python2 -m pip install "docopt<1" "jinja2<3"
+            - run: python2 ./bin/interpolate-k8s "gcr.io/<<parameters.project>>/<<parameters.image>>" "${CIRCLE_SHA1:0:10}" "$(kubectl get deployments <<parameters.deployment>> --template={{.status.replicas}})" | kubectl apply -f -
+      - unless:
+          condition: <<parameters.from_template>>
+          steps:
+            - run: kubectl set image deployment/<<parameters.deployment>> <<parameters.deployment>>="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" --record=true
+      - persist_to_workspace:
+          root: /metadata
+          paths:
+            - prev_version/<<parameters.zone>>
+
 orbs:
-  docker: thekevjames/docker@1
+  docker: talkiq/docker@1

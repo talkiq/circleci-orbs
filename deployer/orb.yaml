@@ -1,0 +1,41 @@
+version: 2.1
+description: "Tools for running deployment commands"
+
+jobs:
+  gemfury:
+    description: >
+      Deploy a package to Gemfury (ie. for internal usage only). Use PyPI for
+      OSS projects!
+    docker:
+      - image: python:<<parameters.python_version>>
+    parameters:
+      folder:
+        default: '.'
+        description: >
+          Path to the folder containing the Python package.
+        type: string
+      gemfury_token:
+        default: GEMFURY_TOKEN
+        description: >
+          Name of the env var containing the Gemfury token.
+        type: env_var_name
+      python_version:
+        description: >
+          Python version to use to build and deploy the package. Used as the
+          docker executor, so you can use any sort of tag (eg. ``3.7.4-slim``).
+        type: string
+    steps:
+      - checkout
+      - run: python3 -m pip install wheel
+      - run: cd "<<parameters.folder>>" && python3 setup.py sdist bdist_wheel
+      - run:
+          name: verify tag builds match deploy version
+          command: |
+            if [[ ! -z "${CIRCLE_TAG}" ]]; then
+                code_version=$(find "<<parameters.folder>>/dist" -iname '*.tar.gz' | awk -F- '{sub(/\.tar\.gz/, ""); print $NF}')
+                if [[ ${CIRCLE_TAG} != ${code_version} ]]; then
+                    echo "Version ${code_version} does not match tag ${CIRCLE_TAG}"
+                    exit 1
+                fi
+            fi
+      - run: ls "<<parameters.folder>>/dist" | xargs -I{} curl -F package=@<<parameters.folder>>/dist/{} https://${<<parameters.gemfury_token>>}@push.fury.io/talkiq/

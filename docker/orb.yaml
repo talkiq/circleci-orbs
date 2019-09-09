@@ -60,7 +60,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       local_image_name:
@@ -102,7 +102,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       local_image_name:
@@ -135,7 +135,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       local_image_name:
@@ -169,7 +169,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       local_image_name:
@@ -202,7 +202,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       local_image_name:
@@ -238,7 +238,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       registry:
@@ -270,7 +270,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       registry:
@@ -294,7 +294,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       registry:
@@ -319,7 +319,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       registry:
@@ -343,7 +343,7 @@ commands:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       registry:
@@ -388,7 +388,7 @@ jobs:
         description: >
           Name of the target image. Note that this includes any namespacing --
           eg. for pushing to Dockerhub, you likely want to ensure this looks
-          like "thekevjames/nox"; for other repositories, this may be some
+          like "talkiq/foobar"; for other repositories, this may be some
           other namespace such as "my-gcp-project/my-image-name" for GCR.
         type: string
       path:

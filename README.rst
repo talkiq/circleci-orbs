@@ -16,6 +16,7 @@ Simply include the ``orb`` or ``orbs`` you're interested in within your
 
     version: 2.1
     orbs:
+      deployer: talkiq/deployer@1
       docker: talkiq/docker@1
       gcloud: talkiq/gcloud@1
       linter: talkiq/linter@1

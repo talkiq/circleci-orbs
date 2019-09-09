@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   orb-tools: circleci/orb-tools@7.3.0
-  linter: thekevjames/linter@volatile
+  linter: talkiq/linter@volatile
 
 workflows:
   run-jobs:
@@ -12,6 +12,68 @@ workflows:
           filters:
             tags:
               only: /.*/
+
+      # ORB: deployer
+      - orb-tools/lint:
+          name: lint-orbs-deployer
+          lint-dir: deployer
+          filters:
+            tags:
+              only: /.*/
+      - orb-tools/pack:
+          name: pack-orbs-deployer
+          source-dir: deployer
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - linter/pre-commit
+            - lint-orbs-deployer
+      - orb-tools/publish-dev:
+          context: org-global
+          name: publish-dev-orbs-deployer
+          orb-name: talkiq/deployer
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - pack-orbs-deployer
+      - orb-tools/dev-promote-prod:
+          context: org-global
+          name: dev-promote-prod-orbs-deployer
+          orb-name: talkiq/deployer
+          release: patch
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /deployer-patch/
+          requires:
+            - publish-dev-orbs-deployer
+      - orb-tools/dev-promote-prod:
+          context: org-global
+          name: dev-promote-prod-orbs-deployer
+          orb-name: talkiq/deployer
+          release: minor
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /deployer-minor/
+          requires:
+            - publish-dev-orbs-deployer
+      - orb-tools/dev-promote-prod:
+          context: org-global
+          name: dev-promote-prod-orbs-deployer
+          orb-name: talkiq/deployer
+          release: major
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /deployer-major/
+          requires:
+            - publish-dev-orbs-deployer
 
       # ORB: docker
       - orb-tools/lint:
