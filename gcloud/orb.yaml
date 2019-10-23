@@ -229,5 +229,95 @@ jobs:
           paths:
             - prev_version/<<parameters.zone>>
 
+  deploy-cloud-run:
+    docker:
+      - image: google/cloud-sdk:alpine
+    parameters:
+      creds:
+        default: GCLOUD_SERVICE_KEY
+      cluster:
+        default: ''
+        description: >
+          If set, deploys to a Knative cluster rather than using the managed
+          Cloud Run service.
+        type: string
+      deployment:
+        type: string
+      # TODO: Find a better way to do this. CircleCI does not have a list
+      # type yet: https://ideas.circleci.com/ideas/CCI-I-701
+      env_vars:
+        type: string
+      image:
+        type: string
+      memory:
+        default: 128Mi
+        type: string
+      project:
+        description: >
+          Name of GCP project to which we will push.
+        type: string
+      region:
+        type: string
+    steps:
+      - auth:
+          creds: <<parameters.creds>>
+          project: <<parameters.project>>
+      - run: echo y | gcloud components install beta
+      - unless:
+          condition: <<parameters.cluster>>
+          steps:
+            - run: |
+                gcloud beta run deploy <<parameters.deployment>> \
+                  --platform=managed \
+                  --image="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
+                  --memory=<<parameters.memory>> \
+                  --region=<<parameters.region>> \
+                  --set-env-vars <<parameters.env_vars>> &> output
+      - when:
+          condition: <<parameters.cluster>>
+          steps:
+            - run: |
+                gcloud beta run deploy <<parameters.deployment>> \
+                  --platform=gke \
+                  --image "gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
+                  --memory=<<parameters.memory>> \
+                  --cluster=<<parameters.cluster>> \
+                  --cluster-location=<<parameters.region>> \
+                  --namespace=<<parameters.project>> \
+                  --set-env-vars <<parameters.env_vars>> &> output
+      - run: cat output
+
+  deploy-cloud-function:
+    docker:
+      - image: google/cloud-sdk:alpine
+    parameters:
+      creds:
+        type: env_var_name
+      funcname:
+        type: string
+      packagename:
+        type: string
+      project:
+        description: >
+          Name of GCP project to which we will push.
+        type: string
+    steps:
+      - auth:
+          creds: <<parameters.creds>>
+          project: <<parameters.project>>
+      - run: apk add --no-cache --no-progress zip
+      - checkout
+      - run:
+          name: package function source as zip and upload to gcs
+          command: |
+            cd functions/
+            cp "./<<parameters.packagename>>/requirements.txt" requirements.txt
+            cp "./<<parameters.packagename>>/mains/<<parameters.funcname>>.py" main.py
+            zip -r "<<parameters.funcname>>.zip" "./<<parameters.packagename>>"/* main.py requirements.txt
+            gsutil cp "<<parameters.funcname>>.zip" "gs://<<parameters.project>>-cloud-function-zips/<<parameters.packagename>>/"
+      - run: |
+          gcloud functions deploy <<parameters.funcname>> \
+            --source="gs://<<parameters.project>>-cloud-function-zips/<<parameters.packagename>>/<<parameters.funcname>>.zip"
+
 orbs:
   docker: talkiq/docker@1
