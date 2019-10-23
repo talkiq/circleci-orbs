@@ -174,7 +174,7 @@ jobs:
           steps:
             - run: |
                 gcloud beta run deploy <<parameters.deployment>> \
-                  --platform=managed \
+                  --platform=managed --no-allow-unauthenticated \
                   --image="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
                   --memory=<<parameters.memory>> \
                   --region=<<parameters.region>> \
