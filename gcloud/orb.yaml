@@ -222,6 +222,11 @@ jobs:
           do a full deployment from the k8s yaml template. Otherwise, simply
           updated the image hash of the deployment.
         type: boolean
+      template_path:
+        type: string
+        default: ./k8s.yaml.j2
+        description: >
+          Path to container specs file for use in ``./bin/interpolate-k8s``.
       image:
         default: ${CIRCLE_PROJECT_REPONAME}
         description: >
@@ -264,7 +269,7 @@ jobs:
           steps:
             - run: python2 -m ensurepip
             - run: python2 -m pip install "docopt<1" "jinja2<3"
-            - run: python2 ./bin/interpolate-k8s "gcr.io/<<parameters.project>>/<<parameters.image>>" "${CIRCLE_SHA1:0:10}" "$(kubectl get deployments <<parameters.deployment>> --template={{.status.replicas}})" | kubectl apply -f -
+            - run: python2 ./bin/interpolate-k8s --template="<<parameters.template_path>>" "gcr.io/<<parameters.project>>/<<parameters.image>>" "${CIRCLE_SHA1:0:10}" "$(kubectl get deployments <<parameters.deployment>> --template={{.status.replicas}})" | kubectl apply -f -
       - unless:
           condition: <<parameters.from_template>>
           steps:
