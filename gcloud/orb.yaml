@@ -108,6 +108,7 @@ jobs:
             cd functions/
             cp "./<<parameters.packagename>>/requirements.txt" requirements.txt
             cp "./<<parameters.packagename>>/mains/<<parameters.funcname>>.py" main.py
+            sed -i "s/\${GEMFURY_TOKEN}/$GEMFURY_TOKEN/g" requirements.txt
             zip -r "<<parameters.funcname>>.zip" "./<<parameters.packagename>>"/* main.py requirements.txt
             gsutil cp "<<parameters.funcname>>.zip" "gs://<<parameters.project>>-cloud-function-zips/<<parameters.packagename>>/"
       - run: |
