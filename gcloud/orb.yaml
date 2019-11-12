@@ -244,6 +244,11 @@ jobs:
         description: >
           Container registry to-be-used.
         type: string
+      tag:
+        default: ${CIRCLE_SHA1:0:10}
+        description: >
+          Tag to-be-deployed.
+        type: string
       zone:
         type: string
     steps:
@@ -269,11 +274,11 @@ jobs:
           steps:
             - run: python2 -m ensurepip
             - run: python2 -m pip install "docopt<1" "jinja2<3"
-            - run: python2 ./bin/interpolate-k8s --template="<<parameters.template_path>>" "gcr.io/<<parameters.project>>/<<parameters.image>>" "${CIRCLE_SHA1:0:10}" "$(kubectl get deployments <<parameters.deployment>> --template={{.status.replicas}})" | kubectl apply -f -
+            - run: python2 ./bin/interpolate-k8s --template="<<parameters.template_path>>" "gcr.io/<<parameters.project>>/<<parameters.image>>" "<<parameters.tag>>" "$(kubectl get deployments <<parameters.deployment>> --template={{.status.replicas}})" | kubectl apply -f -
       - unless:
           condition: <<parameters.from_template>>
           steps:
-            - run: kubectl set image deployment/<<parameters.deployment>> <<parameters.deployment>>="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" --record=true
+            - run: kubectl set image deployment/<<parameters.deployment>> <<parameters.deployment>>="gcr.io/<<parameters.project>>/<<parameters.image>>:<<parameters.tag>>" --record=true
       - persist_to_workspace:
           root: /metadata
           paths:
