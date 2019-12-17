@@ -24,6 +24,13 @@ jobs:
           Python version to use to build and deploy the package. Used as the
           docker executor, so you can use any sort of tag (eg. ``3.7.4-slim``).
         type: string
+      verify_version:
+        default: ${CIRCLE_TAG}
+        description: >
+          If set to a non-empty value, fails the deployment if the version
+          being deployed does not match. Can be used as a last-step sanity
+          check.
+        type: string
     steps:
       - checkout
       - run: python3 -m pip install wheel
@@ -31,9 +38,9 @@ jobs:
       - run:
           name: verify tag builds match deploy version
           command: |
-            if [[ ! -z "${CIRCLE_TAG}" ]]; then
+            if [[ ! -z "<<parameters.verify_version>>" ]]; then
                 code_version=$(find "<<parameters.folder>>/dist" -iname '*.tar.gz' | awk -F- '{sub(/\.tar\.gz/, ""); print $NF}')
-                if [[ ${CIRCLE_TAG} != ${code_version} ]]; then
+                if [[ <<parameters.verify_version>> != ${code_version} ]]; then
                     echo "Version ${code_version} does not match tag ${CIRCLE_TAG}"
                     exit 1
                 fi
