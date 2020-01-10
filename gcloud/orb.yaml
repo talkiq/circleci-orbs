@@ -192,7 +192,10 @@ jobs:
                   --cluster-location=<<parameters.region>> \
                   --namespace=<<parameters.project>> \
                   --set-env-vars <<parameters.env_vars>> &> output
-      - run: cat output
+      - run:
+          name: cat output
+          command: cat output
+          when: always
 
   deploy-gke:
     description: >
