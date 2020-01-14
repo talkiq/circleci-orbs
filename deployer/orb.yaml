@@ -40,7 +40,9 @@ jobs:
           command: |
             if [[ ! -z "<<parameters.verify_version>>" ]]; then
                 code_version=$(find "<<parameters.folder>>/dist" -iname '*.tar.gz' | awk -F- '{sub(/\.tar\.gz/, ""); print $NF}')
-                if [[ <<parameters.verify_version>> != ${code_version} ]]; then
+                code_version_alt="${code_version/.dev/-dev.}"
+                if [[ <<parameters.verify_version>> != ${code_version} &&
+                      <<parameters.verify_version>> != ${code_version_alt} ]]; then
                     echo "Version ${code_version} does not match tag ${CIRCLE_TAG}"
                     exit 1
                 fi
