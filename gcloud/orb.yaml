@@ -275,9 +275,9 @@ jobs:
       - when:
           condition: <<parameters.from_template>>
           steps:
-            - run: python2 -m ensurepip
-            - run: python2 -m pip install "docopt<1" "jinja2<3"
-            - run: python2 ./bin/interpolate-k8s --deployment="<<parameters.deployment>>" --template="<<parameters.template_path>>" "gcr.io/<<parameters.project>>/<<parameters.image>>" "<<parameters.tag>>" "$(kubectl get deployments <<parameters.deployment>> --template={{.status.replicas}})" | kubectl apply -f -
+            - run: python3 -m ensurepip
+            - run: python3 -m pip install "docopt<1" "jinja2<3"
+            - run: python3 ./bin/interpolate-k8s --deployment="<<parameters.deployment>>" --template="<<parameters.template_path>>" "gcr.io/<<parameters.project>>/<<parameters.image>>" "<<parameters.tag>>" "$(kubectl get deployments <<parameters.deployment>> --template={{.status.replicas}})" | kubectl apply -f -
       - unless:
           condition: <<parameters.from_template>>
           steps:
