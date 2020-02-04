@@ -40,7 +40,7 @@ jobs:
           name: clean up sphinx-apidoc cruft
           command: |
             rm -f ./docs/code/modules.rst ./docs/code/voiceai.rst
-      - run: sphinx-build -M html docs/ build/
+      - run: sphinx-build -M html ./ build/
       - run:
           name: nuke pre-existing docs
           command: |
