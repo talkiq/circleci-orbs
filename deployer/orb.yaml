@@ -95,4 +95,4 @@ jobs:
       - run: ls "<<parameters.folder>>/dist" | xargs -I{} curl -F package=@<<parameters.folder>>/dist/{} https://${<<parameters.gemfury_token>>}@push.fury.io/talkiq/
 
 orbs:
-  docker: talkiq/gcloud@1
+  gcloud: talkiq/gcloud@1
