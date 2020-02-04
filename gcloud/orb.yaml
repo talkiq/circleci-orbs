@@ -152,6 +152,12 @@ jobs:
           image will be pushed to will look like:
           <<parameters.registry>>/<<parameters.project>>/<<parameters.image>>.
         type: string
+      managed_flags:
+        description: >
+          Flags to pass to the `gcloud run deploy` command. Will only be used
+          for managed deploys (eg. Cloud Run rather than Knative).
+        default: --no-allow-unauthenticated
+        type: string
       memory:
         description: >
           Memory to be allocated to our cloud run container, measured in Mi.
@@ -175,7 +181,7 @@ jobs:
           steps:
             - run: |
                 gcloud beta run deploy <<parameters.deployment>> \
-                  --platform=managed --no-allow-unauthenticated \
+                  --platform=managed <<parameters.managed_flags>> \
                   --image="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
                   --memory=<<parameters.memory>> \
                   --region=<<parameters.region>> \
