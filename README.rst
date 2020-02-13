@@ -9,7 +9,7 @@ implementation-specific to be worthwhile outside of the company.
 Usage
 -----
 
-|deployer| |docker| |gcloud| |linter| |notifier| |tester|
+|deployer| |docker| |docs| |gcloud| |linter| |notifier| |tester|
 
 Simply include the ``orb`` or ``orbs`` you're interested in within your
 ``.circleci/config.yml`` file:
@@ -20,6 +20,7 @@ Simply include the ``orb`` or ``orbs`` you're interested in within your
     orbs:
       deployer: talkiq/deployer@2
       docker: talkiq/docker@1
+      docs: talkiq/docs@1
       gcloud: talkiq/gcloud@1
       linter: talkiq/linter@1
       notifier: talkiq/notifier@1
@@ -43,6 +44,10 @@ pre-merge.
 .. |docker| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/docker&style=flat-square&label=docker
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/docker
+
+.. |docs| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/docs&style=flat-square&label=docs
+    :alt: Latest Version
+    :target: https://circleci.com/orbs/registry/orb/talkiq/docs
 
 .. |gcloud| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/gcloud&style=flat-square&label=gcloud
     :alt: Latest Version

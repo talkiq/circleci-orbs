@@ -5,7 +5,7 @@ jobs:
   docs:
     description: >
       Deploy a package's Sphinxdocs to Google Storage (ie. for internal use
-      only).
+      only). Deprecated: use the `talkiq/docs` orb.
     docker:
       - image: python:3.7.6-alpine
     parameters:
