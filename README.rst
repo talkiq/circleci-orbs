@@ -20,7 +20,7 @@ Simply include the ``orb`` or ``orbs`` you're interested in within your
     orbs:
       deployer: talkiq/deployer@2
       docker: talkiq/docker@1
-      docs: talkiq/docs@1
+      docs: talkiq/docs@0
       gcloud: talkiq/gcloud@1
       linter: talkiq/linter@1
       notifier: talkiq/notifier@1

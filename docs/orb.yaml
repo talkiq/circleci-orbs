@@ -47,7 +47,8 @@ jobs:
 
   compile-and-upload:
     description: >
-      Compile Sphinxdocs from a docs folder.
+      Compile Sphinxdocs from a docs folder, then deploy it to Google Storage
+      (ie. for internal use only).
     docker:
       - image: python:3.7.6-alpine
     parameters:
@@ -71,6 +72,11 @@ jobs:
         type: string
       gcp_project:
         description: The Google project ID to connect with via the gcloud CLI.
+        type: string
+      project:
+        default: ${CIRCLE_PROJECT_REPONAME}
+        description: |
+          The name of the project folder in GCS.
         type: string
     steps:
       - run: python3 -m pip install sphinx
