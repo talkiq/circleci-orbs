@@ -100,3 +100,6 @@ jobs:
             gsutil -m rm -r gs://<<parameters.gcp_project>>-docs/<<parameters.project>>/ ||:
       - run: gsutil -m cp -r build/html/* gs://<<parameters.gcp_project>>-docs/<<parameters.project>>/
       # END TODO
+
+orbs:
+  gcloud: talkiq/gcloud@1
