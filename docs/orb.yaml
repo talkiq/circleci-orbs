@@ -6,8 +6,14 @@ jobs:
     description: >
       Build Sphinxdocs for a source folder.
     docker:
-      - image: python:3.7.6-alpine
+      - image: <<parameters.executor>>
     parameters:
+      executor:
+        default: python:3.7.6-alpine
+        description: >
+          Name of the docker image to use to execute the job. Must have python3
+          installed.
+        type: string
       folder:
         default: '.'
         description: >
@@ -50,7 +56,7 @@ jobs:
       Compile Sphinxdocs from a docs folder, then deploy it to Google Storage
       (ie. for internal use only).
     docker:
-      - image: python:3.7.6-alpine
+      - image: <<parameters.executor>>
     parameters:
       code_dir:
         description: >
@@ -64,6 +70,12 @@ jobs:
           Name of environment variable storing the base64-encoded service key
           for the GCP project.
         type: env_var_name
+      executor:
+        default: python:3.7.6-alpine
+        description: >
+          Name of the docker image to use to execute the job. Must have python3
+          installed.
+        type: string
       folder:
         default: '.'
         description: >
