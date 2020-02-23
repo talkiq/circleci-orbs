@@ -35,7 +35,7 @@ jobs:
         description: >
           If there are any packages which must be installed before running
           `sphinx-build`, add them here. It's like the case that this should
-          match the `pre-process` step; eg. if you are generating APIdocs for
+          match the `preprocess` step; eg. if you are generating APIdocs for
           source folders, you will need to have those packages (and their
           dependencies!) be importable by sphinx.
 
@@ -47,7 +47,7 @@ jobs:
           ```
         type: steps
         default: []
-      pre-process:
+      preprocess:
         description: >
           Any number of (optional) pre-processing steps for generating Sphinx
           documentation. A common use-case here is to pass in `sphinx-apidoc`
@@ -80,7 +80,7 @@ jobs:
     steps:
       - run: python3 -m pip install sphinx
       - checkout
-      - steps: <<parameters.pre-process>>
+      - steps: <<parameters.preprocess>>
       - steps: <<parameters.install>>
       - run: sphinx-build -M html <<parameters.folder>>/ build/
       # TODO: this should probably get moved to eg. `gcloud/deploy-to-gcs`
