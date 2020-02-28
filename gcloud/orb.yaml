@@ -271,13 +271,13 @@ jobs:
       - configure-gke:
           cluster: <<parameters.cluster>>
           zone: <<parameters.zone>>
-      - run: mkdir -p /metadata/prev_version
+      - run: mkdir -p /metadata/prev_version/<<parameters.deployment>>
       - run:
           name: store previous version
           command: |
             kubectl get deployment <<parameters.deployment>> -oyaml \
-                | awk '/image: / {split($0,img,":"); print img[3]}' > /metadata/prev_version/<<parameters.zone>> \
-                || echo 'unknown' > /metadata/prev_version/<<parameters.zone>>
+                | awk '/image: / {split($0,img,":"); print img[3]}' > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>> \
+                || echo 'unknown' > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>>
       - when:
           condition: <<parameters.from_template>>
           steps:
@@ -291,7 +291,7 @@ jobs:
       - persist_to_workspace:
           root: /metadata
           paths:
-            - prev_version/<<parameters.zone>>
+            - prev_version/<<parameters.deployment>>/<<parameters.zone>>
 
   docker-publish:
     description: >
