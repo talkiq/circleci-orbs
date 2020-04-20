@@ -175,22 +175,26 @@ jobs:
       - auth:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
-      - run: echo y | gcloud components install beta
       - unless:
           condition: <<parameters.cluster>>
           steps:
             - run: |
-                gcloud beta run deploy <<parameters.deployment>> \
+                gcloud run deploy <<parameters.deployment>> \
                   --platform=managed <<parameters.managed_flags>> \
                   --image="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
                   --memory=<<parameters.memory>> \
                   --region=<<parameters.region>> \
                   --set-env-vars <<parameters.env_vars>> &> output
+            - run: |
+                gcloud run services update-traffic <<parameters.deployment>> \
+                  --platform=managed \
+                  --region=<<parameters.region>> \
+                  --to-latest
       - when:
           condition: <<parameters.cluster>>
           steps:
             - run: |
-                gcloud beta run deploy <<parameters.deployment>> \
+                gcloud run deploy <<parameters.deployment>> \
                   --platform=gke \
                   --image "gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
                   --memory=<<parameters.memory>> \
@@ -198,6 +202,12 @@ jobs:
                   --cluster-location=<<parameters.region>> \
                   --namespace=<<parameters.project>> \
                   --set-env-vars <<parameters.env_vars>> &> output
+            - run: |
+                gcloud run services update-traffic <<parameters.deployment>> \
+                  --platform=gke \
+                  --cluster=<<parameters.cluster>> \
+                  --cluster-location=<<parameters.region>> \
+                  --to-latest
       - run:
           name: cat output
           command: cat output
