@@ -134,6 +134,11 @@ jobs:
           If set, deploys to a Knative cluster rather than using the managed
           Cloud Run service.
         type: string
+      cpu:
+        default: 1
+        decription: >
+          CPU to be allocated to our cloud run container.
+        type: string
       deployment:
         description: >
           Name of deployment to-be-updated.
@@ -182,6 +187,7 @@ jobs:
                 gcloud run deploy <<parameters.deployment>> \
                   --platform=managed <<parameters.managed_flags>> \
                   --image="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
+                  --cpu=<<parameters.cpu>> \
                   --memory=<<parameters.memory>> \
                   --region=<<parameters.region>> \
                   --set-env-vars <<parameters.env_vars>> &> output
@@ -197,6 +203,7 @@ jobs:
                 gcloud run deploy <<parameters.deployment>> \
                   --platform=gke \
                   --image "gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
+                  --cpu=<<parameters.cpu>> \
                   --memory=<<parameters.memory>> \
                   --cluster=<<parameters.cluster>> \
                   --cluster-location=<<parameters.region>> \
@@ -207,6 +214,7 @@ jobs:
                   --platform=gke \
                   --cluster=<<parameters.cluster>> \
                   --cluster-location=<<parameters.region>> \
+                  --namespace=<<parameters.project>> \
                   --to-latest
       - run:
           name: cat output
