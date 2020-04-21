@@ -135,8 +135,8 @@ jobs:
           Cloud Run service.
         type: string
       cpu:
-        default: 1
-        decription: >
+        default: '1'
+        description: >
           CPU to be allocated to our cloud run container.
         type: string
       deployment:
