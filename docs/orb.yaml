@@ -82,7 +82,7 @@ jobs:
       - checkout
       - steps: <<parameters.preprocess>>
       - steps: <<parameters.install>>
-      - run: sphinx-build -M html <<parameters.folder>>/ build/
+      - run: sphinx-build -b html -W --keep-going <<parameters.folder>>/ build/
       # TODO: this should probably get moved to eg. `gcloud/deploy-to-gcs`
       - gcloud/install
       - gcloud/auth:
