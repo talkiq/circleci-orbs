@@ -92,7 +92,7 @@ jobs:
           name: nuke pre-existing docs
           command: |
             gsutil -m rm -r gs://<<parameters.gcp_project>>-docs/<<parameters.project>>/ ||:
-      - run: gsutil -m cp -r build/html/* gs://<<parameters.gcp_project>>-docs/<<parameters.project>>/
+      - run: gsutil -m cp -r build/* gs://<<parameters.gcp_project>>-docs/<<parameters.project>>/
       # END TODO
 
 orbs:
