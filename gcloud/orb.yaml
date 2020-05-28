@@ -77,6 +77,7 @@ jobs:
       Deploy a package to Google's Cloud Function service.
     docker:
       - image: google/cloud-sdk:alpine
+    resource_class: <<parameters.resource_class>>
     parameters:
       creds:
         default: GCLOUD_SERVICE_KEY
@@ -95,6 +96,9 @@ jobs:
       project:
         description: >
           Name of GCP project to which we will push.
+        type: string
+      resource_class:
+        default: small
         type: string
     steps:
       - auth:
@@ -121,6 +125,7 @@ jobs:
       specified Knative cluster.
     docker:
       - image: google/cloud-sdk:alpine
+    resource_class: <<parameters.resource_class>>
     parameters:
       creds:
         default: GCLOUD_SERVICE_KEY
@@ -176,6 +181,9 @@ jobs:
         description: >
           Name of GCP region to which we will push.
         type: string
+      resource_class:
+        default: small
+        type: string
     steps:
       - auth:
           creds: <<parameters.creds>>
@@ -229,6 +237,7 @@ jobs:
       ``./bin/interpolate-k8s`` to build a ``k8s.yaml`` file otherwise.
     docker:
       - image: google/cloud-sdk:alpine
+    resource_class: <<parameters.resource_class>>
     parameters:
       creds:
         default: GCLOUD_SERVICE_KEY
@@ -270,6 +279,9 @@ jobs:
         default: 'gcr.io'
         description: >
           Container registry to-be-used.
+        type: string
+      resource_class:
+        default: small
         type: string
       tag:
         default: ${CIRCLE_SHA1:0:10}
@@ -319,6 +331,7 @@ jobs:
       build), tag (if this is a tag build), and "latest".
     docker:
       - image: <<parameters.executor>>
+    resource_class: <<parameters.resource_class>>
     parameters:
       build_args:
         default: ''
@@ -362,6 +375,9 @@ jobs:
         default: 'gcr.io'
         description: >
           Container registry to-be-used.
+        type: string
+      resource_class:
+        default: medium
         type: string
       workspace:
         default: ''
