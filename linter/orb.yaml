@@ -28,6 +28,10 @@ commands:
           paths:
             - ~/.cache/pre-commit
       - run: pre-commit run --all-files -c <<parameters.config_file>>
+      - run:
+          name: git diff
+          command: git diff
+          when: on_fail
 
 jobs:
   pre-commit:
