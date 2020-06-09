@@ -39,6 +39,7 @@ jobs:
       Runs pre-commit hooks against the current repo.
     docker:
       - image: python:<<parameters.python_version>>
+    resource_class: <<parameters.resource_class>>
     parameters:
       config_file:
         default: '.pre-commit-config.yaml'
@@ -49,6 +50,9 @@ jobs:
         default: 3.7.2
         description: |
           The python version used to run pre-commit.
+        type: string
+      resource_class:
+        default: small
         type: string
     steps:
       - pre-commit:

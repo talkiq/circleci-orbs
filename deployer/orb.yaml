@@ -8,6 +8,7 @@ jobs:
       OSS projects!
     docker:
       - image: python:<<parameters.python_version>>
+    resource_class: <<parameters.resource_class>>
     parameters:
       folder:
         default: '.'
@@ -23,6 +24,9 @@ jobs:
         description: >
           Python version to use to build and deploy the package. Used as the
           docker executor, so you can use any sort of tag (eg. ``3.7.4-slim``).
+        type: string
+      resource_class:
+        default: small
         type: string
       verify_version:
         default: ${CIRCLE_TAG}

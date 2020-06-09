@@ -9,6 +9,7 @@ jobs:
       APIdocs, etc.
     docker:
       - image: <<parameters.executor>>
+    resource_class: <<parameters.resource_class>>
     parameters:
       creds:
         default: GCLOUD_SERVICE_KEY
@@ -76,6 +77,9 @@ jobs:
         default: ${CIRCLE_PROJECT_REPONAME}
         description: |
           The name of the project folder in GCS.
+        type: string
+      resource_class:
+        default: small
         type: string
     steps:
       - run: python3 -m pip install sphinx

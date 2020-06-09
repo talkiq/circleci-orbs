@@ -367,6 +367,7 @@ jobs:
       this is a tag build), and "latest".
     docker:
       - image: <<parameters.executor>>
+    resource_class: <<parameters.resource_class>>
     parameters:
       build_args:
         default: ''
@@ -400,6 +401,9 @@ jobs:
         default: 'docker.io'
         description: >
           Container registry to-be-used.
+        type: string
+      resource_class:
+        default: medium
         type: string
       workspace:
         default: ''

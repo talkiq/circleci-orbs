@@ -7,6 +7,7 @@ jobs:
       Runs pip check against the current repo.
     docker:
       - image: python:<<parameters.python_version>>
+    resource_class: <<parameters.resource_class>>
     parameters:
       cache_prefix:
         default: ''
@@ -33,6 +34,9 @@ jobs:
         default: 3.7.2
         description: |
           The python version used to run pytest.
+        type: string
+      resource_class:
+        default: small
         type: string
     steps:
       - checkout
@@ -67,6 +71,7 @@ jobs:
       Runs pytest against the current repo.
     docker:
       - image: python:<<parameters.python_version>>
+    resource_class: <<parameters.resource_class>>
     parameters:
       args:
         default: ''
@@ -98,6 +103,9 @@ jobs:
         default: 3.7.2
         description: |
           The python version used to run pytest.
+        type: string
+      resource_class:
+        default: small
         type: string
     steps:
       - checkout
