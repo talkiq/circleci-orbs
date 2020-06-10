@@ -44,7 +44,7 @@ commands:
       - run:
           name: docker build
           command: |
-            docker build \
+            DOCKER_BUILDKIT=1 docker build \
               <<parameters.build_args>> \
               -f <<parameters.path>>/<<parameters.dockerfile>> \
               -t <<parameters.local_image_name>> \
