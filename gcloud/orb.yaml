@@ -406,4 +406,4 @@ jobs:
           registry: <<parameters.registry>>
 
 orbs:
-  docker: talkiq/docker@1
+  docker: talkiq/docker@2
