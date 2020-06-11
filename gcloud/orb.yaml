@@ -351,7 +351,7 @@ jobs:
           Name of dockerfile to use.
         type: string
       executor:
-        default: docker:18.09.9-git
+        default: docker:18.09.3-git
         description: >
           Name of the docker image to use to execute the job.
         type: string

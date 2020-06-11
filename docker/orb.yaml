@@ -44,12 +44,14 @@ commands:
       - run:
           name: docker build
           command: |
-            DOCKER_BUILDKIT=1 docker build \
+            docker build \
               <<parameters.build_args>> \
               --progress=plain \
               -f <<parameters.path>>/<<parameters.dockerfile>> \
               -t <<parameters.local_image_name>> \
               <<parameters.path>>
+          environment:
+            DOCKER_BUILDKIT: 1
 
   tag:
     description: >
