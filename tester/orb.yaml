@@ -134,3 +134,47 @@ jobs:
           command: |
             cd <<parameters.cwd>>
             python -m pytest <<parameters.args>>
+
+  integration-tests:
+    description:
+      Runs integration tests using docker-compose
+    docker:
+      - image: <<parameters.executor>>
+    resource_class: <<parameters.resource_class>>
+    parameters:
+      args:
+        default: ''
+        description: |
+          Arguments to pass to pytest
+        type: string
+      cwd:
+        default: '.'
+        description: >
+          Working directory used when running pip / pytest commands.
+        type: string
+      executor:
+        default: cimg/base:2020.01
+        description: >
+          Name of the docker image to use to execute the job.
+        type: string
+      resource_class:
+        default: small
+        type: string
+      service_name:
+        default: integration-tests
+        description: >
+          Name of docker-compose service containing integration tests
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: 18.09.3
+      - checkout
+      - run:
+          working_directory: <<parameters.cwd>>
+          # has to be built explicitely https://github.com/docker/compose/issues/7336
+          command: |
+            docker-compose build <<parameters.service_name>>
+            docker-compose run --rm <<parameters.service_name>> <<parameters.args>>
+          environment:
+            DOCKER_BUILDKIT: 1
+            COMPOSE_DOCKER_CLI_BUILD: 1
