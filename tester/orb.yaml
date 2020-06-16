@@ -135,9 +135,9 @@ jobs:
             cd <<parameters.cwd>>
             python -m pytest <<parameters.args>>
 
-  integration-tests:
+  docker-compose:
     description:
-      Runs integration tests using docker-compose
+      Runs docker-compose service
     docker:
       - image: <<parameters.executor>>
     resource_class: <<parameters.resource_class>>
@@ -161,9 +161,8 @@ jobs:
         default: small
         type: string
       service_name:
-        default: integration-tests
         description: >
-          Name of docker-compose service containing integration tests
+          Name of docker-compose service to run
         type: string
     steps:
       - setup_remote_docker:
@@ -172,9 +171,10 @@ jobs:
       - run:
           working_directory: <<parameters.cwd>>
           # has to be built explicitly https://github.com/docker/compose/issues/7336
-          command: |
-            docker-compose build <<parameters.service_name>>
-            docker-compose run --rm <<parameters.service_name>> <<parameters.args>>
+          command: docker-compose build <<parameters.service_name>>
           environment:
             DOCKER_BUILDKIT: 1
             COMPOSE_DOCKER_CLI_BUILD: 1
+      - run:
+          working_directory: <<parameters.cwd>>
+          command: docker-compose run --rm <<parameters.service_name>> <<parameters.args>>
