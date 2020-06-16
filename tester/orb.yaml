@@ -145,12 +145,12 @@ jobs:
       args:
         default: ''
         description: |
-          Arguments to pass to pytest
+          Arguments to pass to downstream container
         type: string
       cwd:
         default: '.'
         description: >
-          Working directory used when running pip / pytest commands.
+          Working directory used when running docker-compose commands.
         type: string
       executor:
         default: cimg/base:2020.01
@@ -171,7 +171,7 @@ jobs:
       - checkout
       - run:
           working_directory: <<parameters.cwd>>
-          # has to be built explicitely https://github.com/docker/compose/issues/7336
+          # has to be built explicitly https://github.com/docker/compose/issues/7336
           command: |
             docker-compose build <<parameters.service_name>>
             docker-compose run --rm <<parameters.service_name>> <<parameters.args>>
