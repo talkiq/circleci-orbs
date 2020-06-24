@@ -147,6 +147,11 @@ jobs:
         description: |
           Arguments to pass to downstream container
         type: string
+      build:
+        default: ''
+        description: |
+          Services to build besides target service
+        type: string
       cwd:
         default: '.'
         description: >
@@ -171,7 +176,7 @@ jobs:
       - run:
           working_directory: <<parameters.cwd>>
           # has to be built explicitly https://github.com/docker/compose/issues/7336
-          command: docker-compose build <<parameters.service_name>>
+          command: docker-compose build <<parameters.service_name>> <<parameters.build>>
           environment:
             DOCKER_BUILDKIT: 1
             COMPOSE_DOCKER_CLI_BUILD: 1
