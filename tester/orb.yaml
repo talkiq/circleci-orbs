@@ -134,3 +134,52 @@ jobs:
           command: |
             cd <<parameters.cwd>>
             python -m pytest <<parameters.args>>
+
+  docker-compose:
+    description:
+      Runs docker-compose service
+    docker:
+      - image: <<parameters.executor>>
+    resource_class: <<parameters.resource_class>>
+    parameters:
+      args:
+        default: ''
+        description: |
+          Arguments to pass to downstream container
+        type: string
+      build:
+        default: ''
+        description: |
+          Services to build besides target service
+        type: string
+      cwd:
+        default: '.'
+        description: >
+          Working directory used when running docker-compose commands.
+        type: string
+      executor:
+        default: cimg/base:2020.01
+        description: >
+          Name of the docker image to use to execute the job.
+        type: string
+      resource_class:
+        default: small
+        type: string
+      service_name:
+        description: >
+          Name of docker-compose service to run
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: 18.09.3
+      - checkout
+      - run:
+          working_directory: <<parameters.cwd>>
+          # has to be built explicitly https://github.com/docker/compose/issues/7336
+          command: docker-compose build <<parameters.service_name>> <<parameters.build>>
+          environment:
+            DOCKER_BUILDKIT: 1
+            COMPOSE_DOCKER_CLI_BUILD: 1
+      - run:
+          working_directory: <<parameters.cwd>>
+          command: docker-compose run --rm <<parameters.service_name>> <<parameters.args>>
