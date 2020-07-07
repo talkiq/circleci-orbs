@@ -188,4 +188,7 @@ jobs:
       - run:
           working_directory: <<parameters.cwd>>
           command: docker-compose <<parameters.compose_args>> run --rm <<parameters.service_name>> <<parameters.args>>
-
+      - run:
+          working_directory: <<parameters.cwd>>
+          command: docker-compose <<parameters.compose_args>> logs
+          when: on_fail
