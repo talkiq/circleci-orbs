@@ -157,6 +157,11 @@ jobs:
         description: >
           Working directory used when running docker-compose commands.
         type: string
+      compose_args:
+        default: '-f docker-compose.yaml'
+        description: >
+          Docker-compose args such as a chain of files to use.
+        type: string
       executor:
         default: cimg/base:2020.01
         description: >
@@ -176,10 +181,11 @@ jobs:
       - run:
           working_directory: <<parameters.cwd>>
           # has to be built explicitly https://github.com/docker/compose/issues/7336
-          command: docker-compose build <<parameters.service_name>> <<parameters.build>>
+          command: docker-compose <<parameters.compose_args>> build <<parameters.service_name>> <<parameters.build>>
           environment:
             DOCKER_BUILDKIT: 1
             COMPOSE_DOCKER_CLI_BUILD: 1
       - run:
           working_directory: <<parameters.cwd>>
-          command: docker-compose run --rm <<parameters.service_name>> <<parameters.args>>
+          command: docker-compose <<parameters.compose_args>> run --rm <<parameters.service_name>> <<parameters.args>>
+
