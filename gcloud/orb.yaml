@@ -31,9 +31,25 @@ commands:
     description: >
       Configure a local docker client with authentication to GCR. Requires you
       to have already run gcloud/auth.
+    parameters:
+      docker_layer_caching:
+        default: false
+        description: >
+          If enabled, turns on CircleCI's docker_layer_caching which makes
+          builds faster by skipping steps that have not changed.
+        type: boolean
     steps:
-      - setup_remote_docker:
-          version: 18.09.3
+      - when:
+          condition: <<parameters.docker_layer_caching>>
+          steps:
+            - setup_remote_docker:
+                version: 18.09.3
+                docker_layer_caching: true
+      - unless:
+          condition: <<parameters.docker_layer_caching>>
+          steps:
+            - setup_remote_docker:
+                version: 18.09.3
       - run: gcloud auth configure-docker --quiet
 
   configure-gke:
