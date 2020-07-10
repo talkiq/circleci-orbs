@@ -163,7 +163,7 @@ jobs:
         description: >
           Docker-compose args such as a chain of files to use.
         type: string
-      creds:
+      gcr_creds:
         default: GCLOUD_SERVICE_KEY
         description: >
           Name of environment variable storing the base64-encoded service key
@@ -180,7 +180,7 @@ jobs:
         description: >
           Which system user executor should run.
         type: string
-      project:
+      gcr_project:
         default: ""
         description: >
           Name of GCP project to pull images from.
@@ -195,16 +195,16 @@ jobs:
     steps:
       - when:
           condition:
-            and: [<<parameters.creds>>, <<parameters.project>>]
+            and: [<<parameters.gcr_creds>>, <<parameters.gcr_project>>]
           steps:
             - gcloud/install
             - gcloud/auth:
-                creds: <<parameters.creds>>
-                project: <<parameters.project>>
+                creds: <<parameters.gcr_creds>>
+                project: <<parameters.gcr_project>>
             - gcloud/configure-docker
       - unless:
           condition:
-            and: [<<parameters.creds>>, <<parameters.project>>]
+            and: [<<parameters.gcr_creds>>, <<parameters.gcr_project>>]
           steps:
             - setup_remote_docker:
                 version: 18.09.3
