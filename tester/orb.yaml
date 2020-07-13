@@ -140,6 +140,7 @@ jobs:
       Runs docker-compose service
     docker:
       - image: <<parameters.executor>>
+        user: <<parameters.user>>
     resource_class: <<parameters.resource_class>>
     parameters:
       args:
@@ -162,10 +163,27 @@ jobs:
         description: >
           Docker-compose args such as a chain of files to use.
         type: string
+      gcr_creds:
+        default: GCLOUD_SERVICE_KEY
+        description: >
+          Name of environment variable storing the base64-encoded service key
+          for the GCP project.
+        type: env_var_name
       executor:
         default: cimg/base:2020.01
         description: >
           Name of the docker image to use to execute the job.
+        type: string
+      user:
+        # this parameter exists because base executor image defaults to non-root user
+        default: root
+        description: >
+          Which system user executor should run.
+        type: string
+      gcr_project:
+        default: ""
+        description: >
+          Name of GCP project to pull images from.
         type: string
       resource_class:
         default: small
@@ -175,8 +193,21 @@ jobs:
           Name of docker-compose service to run
         type: string
     steps:
-      - setup_remote_docker:
-          version: 18.09.3
+      - when:
+          condition:
+            and: [<<parameters.gcr_creds>>, <<parameters.gcr_project>>]
+          steps:
+            - gcloud/install
+            - gcloud/auth:
+                creds: <<parameters.gcr_creds>>
+                project: <<parameters.gcr_project>>
+            - gcloud/configure-docker
+      - unless:
+          condition:
+            and: [<<parameters.gcr_creds>>, <<parameters.gcr_project>>]
+          steps:
+            - setup_remote_docker:
+                version: 18.09.3
       - checkout
       - run:
           working_directory: <<parameters.cwd>>
@@ -188,7 +219,14 @@ jobs:
       - run:
           working_directory: <<parameters.cwd>>
           command: docker-compose <<parameters.compose_args>> run --rm <<parameters.service_name>> <<parameters.args>>
+          environment:
+            # Workaround for docker-compose being unable to pull image from gcr
+            # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/issues/193#issuecomment-586288752
+            LD_LIBRARY_PATH: /usr/local/lib
       - run:
           working_directory: <<parameters.cwd>>
           command: docker-compose <<parameters.compose_args>> logs
           when: on_fail
+
+orbs:
+  gcloud: talkiq/gcloud@4
