@@ -18,7 +18,7 @@ jobs:
           for the GCP project.
         type: env_var_name
       executor:
-        default: python:3.7.6
+        default: python:3.7.8
         description: >
           Name of the docker image to use to execute the job. Must have python3
           installed.

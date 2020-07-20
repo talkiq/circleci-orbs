@@ -31,7 +31,7 @@ jobs:
           Arguments to `pip install` command.
         type: string
       python_version:
-        default: 3.7.2
+        default: 3.7.8
         description: |
           The python version used to run pytest.
         type: string
@@ -100,7 +100,7 @@ jobs:
           Arguments to `pip install` command.
         type: string
       python_version:
-        default: 3.7.2
+        default: 3.7.8
         description: |
           The python version used to run pytest.
         type: string
