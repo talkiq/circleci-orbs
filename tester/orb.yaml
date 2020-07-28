@@ -225,7 +225,7 @@ jobs:
             LD_LIBRARY_PATH: /usr/local/lib
       - run:
           working_directory: <<parameters.cwd>>
-          command: docker-compose <<parameters.compose_args>> logs
+          command: docker-compose <<parameters.compose_args>> logs -t | sort -u -k 3
           when: on_fail
 
 orbs:
