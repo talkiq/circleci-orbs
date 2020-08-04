@@ -93,7 +93,8 @@ jobs:
     description: >
       Deploy a package to Google's Cloud Function service.
     docker:
-      - image: google/cloud-sdk:alpine
+      # TODO: Replace with floating pin on apline moves from version 304.0.0
+      - image: google/cloud-sdk:303.0.0-alpine
     resource_class: <<parameters.resource_class>>
     parameters:
       creds:
@@ -141,7 +142,8 @@ jobs:
       Deploy a container to either Google's managed Cloud Run service or to a
       specified Knative cluster.
     docker:
-      - image: google/cloud-sdk:alpine
+      # TODO: Replace with floating pin on apline moves from version 304.0.0
+      - image: google/cloud-sdk:303.0.0-alpine
     resource_class: <<parameters.resource_class>>
     parameters:
       creds:
@@ -253,7 +255,8 @@ jobs:
       need to checkout the source code) or do a "full deployment" by using
       ``./bin/interpolate-k8s`` to build a ``k8s.yaml`` file otherwise.
     docker:
-      - image: google/cloud-sdk:alpine
+      # TODO: Replace with floating pin on apline moves from version 304.0.0
+      - image: google/cloud-sdk:303.0.0-alpine
     resource_class: <<parameters.resource_class>>
     parameters:
       creds:
