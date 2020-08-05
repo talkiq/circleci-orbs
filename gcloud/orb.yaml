@@ -361,6 +361,12 @@ jobs:
           Name of environment variable storing the base64-encoded service key
           for the GCP project.
         type: env_var_name
+      docker_layer_caching:
+        default: false
+        description: >
+          If enabled, turns on CircleCI's docker_layer_caching which makes
+          builds faster by skipping steps that have not changed.
+        type: boolean
       dockerfile:
         default: Dockerfile
         description: >
@@ -407,7 +413,8 @@ jobs:
       - auth:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
-      - configure-docker
+      - configure-docker:
+          docker_layer_caching: <<parameters.docker_layer_caching>>
       - checkout
       - docker/build:
           build_args: <<parameters.build_args>>
