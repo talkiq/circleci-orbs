@@ -168,6 +168,7 @@ jobs:
       # TODO: Find a better way to do this. CircleCI does not have a list
       # type yet: https://ideas.circleci.com/ideas/CCI-I-701
       env_vars:
+        default: ''
         description: >
           Evironment variables to be passed into the cloud run container.
         type: string

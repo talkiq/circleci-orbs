@@ -4,7 +4,7 @@ description: "Tools for notifying external services about CI events"
 executors:
   alpine-stable:
     docker:
-    - image: alpine:3.10
+    - image: alpine:latest
     resource_class: small
 
 jobs:
