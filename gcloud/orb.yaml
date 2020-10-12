@@ -43,13 +43,13 @@ commands:
           condition: <<parameters.docker_layer_caching>>
           steps:
             - setup_remote_docker:
-                version: 18.09.3
+                version: 19.03.12
                 docker_layer_caching: true
       - unless:
           condition: <<parameters.docker_layer_caching>>
           steps:
             - setup_remote_docker:
-                version: 18.09.3
+                version: 19.03.12
       - run: gcloud auth configure-docker --quiet
 
   configure-gke:
@@ -374,7 +374,7 @@ jobs:
           Name of dockerfile to use.
         type: string
       executor:
-        default: docker:18.09.3-git
+        default: docker:19.03.12-git
         description: >
           Name of the docker image to use to execute the job.
         type: string
