@@ -88,6 +88,50 @@ commands:
       - run: ln -s /root/google-cloud-sdk/bin/gsutil /usr/bin/gsutil
       - run: ln -s /root/google-cloud-sdk/bin/docker-credential-gcloud /usr/bin/docker-credential-gcloud
 
+  update-autoscaler:
+    description: >
+      Update an entry in the autoscaler dynamic configmap and reinitialize the
+      autoscaler to pick up the changes.
+    parameters:
+      config:
+        description: >
+          Local file that contains the autoscaler config for your app.
+        type: string
+      configmap:
+        description: >
+          Name of the dynamically updatable autoscaler k8s configmap.
+        default: "autoscaler-config.d"
+        type: string
+      deployment_name:
+        description: >
+          Name of the autoscaler k8s deployment.
+        default: "autoscaler"
+        type: string
+      entry_name:
+        description: >
+          Define a unique name for the configmap entry that will contain the
+          autoscaler config for your deployment, which is one of such configmap
+          entries the autoscaler will load to form its total autoscaling
+          configuration. We recommend "<your_deployment_name>.yaml".
+        type: string
+    steps:
+      - run:
+          name: construct configmap patch file
+          command: |
+            # Avoid escaping issues by using autoscaler YAML as raw (|)
+            # directly from file. Must indent raw config (using sed here).
+            echo -e "data:\n  <<parameters.entry_name>>: |\n$(sed 's/^\(.*\)/    \1/g' <<parameters.config>>)" > patch.yaml
+      - run:
+          name: update autoscaler entry in configmap
+          command: |
+            kubectl patch configmap/<<parameters.configmap>> \
+              --type merge -p "$(cat patch.yaml)"
+      - run:
+          name: poke autoscaler to pick up configmap changes
+          command: |
+            kubectl patch deployment <<parameters.deployment_name>> \
+              -p '{"spec":{"template":{"metadata":{"annotations":{"date":"'$(date +'%s')'"}}}}}'
+
 jobs:
   deploy-cloud-function:
     description: >
@@ -251,6 +295,102 @@ jobs:
           name: cat output
           command: cat output
           when: always
+
+  deploy-gke-TODO-NAME:
+    description: >
+      Deploy a k8s deployment to GKE via provided YAML. Can optionally update
+      the autoscaler's configuration for this deployment. Will record the
+      previous deployment version in a workspace.
+    docker:
+      - image: google/cloud-sdk:alpine
+    parameters:
+      autoscaler_yaml:
+        description: >
+          The configuration YAML file for the autoscaler. If provided, will
+          attempt to update the autoscaler.
+        type: string
+        default: ""
+      cluster:
+        type: string
+      creds:
+        type: env_var_name
+      deployment:
+        description:
+          Name of your deployment. If you are using multi-deployment
+          autoscaling this may correspond to multiple actual k8s deployments.
+        type: string
+      k8s_yaml:
+        description: >
+          The k8s YAML file for your deployment(s).
+        type: string
+      project:
+        type: string
+      prune_selector:
+        description: >
+          A k8s label selector to identify the k8s deployments that are
+          relevant to this deploy step, and prune those that aren't present in
+          the k8s YAML. Default is not to prune.
+        type: string
+        default: ""
+      version_selector:
+        description: >
+          A k8s label selector to identify which deployment should be recorded
+          as the previous deployment version for release notifications. If not
+          specified, the deployment name is used.
+        type: string
+        default: ""
+      zone:
+        type: string
+    steps:
+      - auth:
+          creds: <<parameters.creds>>
+          project: <<parameters.project>>
+      - configure-gke:
+          cluster: <<parameters.cluster>>
+          zone: <<parameters.zone>>
+      - run: mkdir -p /metadata/prev_version/<<parameters.deployment>>
+      - when:
+          condition: <<parameters.version_selector>>
+          steps:
+            - run:
+                name: store previous version
+                command: |
+                  # Get the deployment image from the currently deployed k8s
+                  # manifest, parse out the tag as the last (3rd) chunk of img, and
+                  # further split the tag to retrieve the rightmost chunk: the commit
+                  # hash.
+                  kubectl get deployments -l <<parameters.version_selector>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>>
+      - unless:
+          condition: <<parameters.version_selector>>
+          steps:
+            - run:
+                name: store previous version
+                command: |
+                  kubectl get deployments <<parameters.deployment>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>>
+      - when:
+          condition: <<parameters.prune_selector>>
+          steps:
+            - run:
+                name: deploy to k8s cluster
+                command: |
+                  kubectl apply -f <<parameters.k8s_yaml>> --prune -l <<parameters.prune_selector>>
+      - unless:
+          condition: <<parameters.prune_selector>>
+          steps:
+            - run:
+                name: deploy to k8s cluster
+                command: |
+                  kubectl apply -f <<parameters.k8s_yaml>>
+      - when:
+          condition: <<parameters.autoscaler_yaml>>
+          steps:
+            - update-autoscaler:
+                config: <<parameters.autoscaler_yaml>>
+                entry_name: <<parameters.deployment>>.yaml
+      - persist_to_workspace:
+          root: /metadata
+          paths:
+            - prev_version/<<parameters.deployment>>/<<parameters.zone>>
 
   deploy-gke:
     description: >
