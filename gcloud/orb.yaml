@@ -301,18 +301,11 @@ jobs:
 
   deploy-gke-TODO-NAME:
     description: >
-      Deploy a k8s deployment to GKE via provided YAML. Can optionally update
-      the autoscaler's configuration for this deployment. Will record the
+      Deploy a k8s deployment to GKE via provided YAML. Will record the
       previous deployment version in a workspace.
     docker:
       - image: google/cloud-sdk:alpine
     parameters:
-      autoscaler_yaml:
-        description: >
-          The configuration YAML file for the autoscaler. If provided, will
-          attempt to update the autoscaler.
-        type: string
-        default: ""
       cluster:
         type: string
       creds:
@@ -384,12 +377,6 @@ jobs:
                 name: deploy to k8s cluster
                 command: |
                   kubectl apply -f <<parameters.k8s_yaml>>
-      - when:
-          condition: <<parameters.autoscaler_yaml>>
-          steps:
-            - update-autoscaler:
-                config: <<parameters.autoscaler_yaml>>
-                entry_name: <<parameters.deployment>>.yaml
       - persist_to_workspace:
           root: /metadata
           paths:
