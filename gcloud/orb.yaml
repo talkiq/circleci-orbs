@@ -124,7 +124,7 @@ commands:
       Force a k8s deployment to redeploy, which causes all pods to be
       recreated.
     parameters:
-      deployment_name:
+      deployment:
         description: >
           Name of the k8s deployment.
         type: string
@@ -132,7 +132,7 @@ commands:
       - run:
           name: poke deployment to force a redeploy
           command: |
-            kubectl patch deployment <<parameters.deployment_name>> \
+            kubectl patch deployment <<parameters.deployment>> \
               -p '{"spec":{"template":{"metadata":{"annotations":{"date":"'$(date +'%s')'"}}}}}'
 
 jobs:
