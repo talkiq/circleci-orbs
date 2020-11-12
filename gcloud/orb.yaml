@@ -299,7 +299,7 @@ jobs:
           command: cat output
           when: always
 
-  deploy-gke-TODO-NAME:
+  deploy-gke-from-yaml:
     description: >
       Deploy a k8s deployment to GKE via provided YAML. Will record the
       previous deployment version in a workspace.
