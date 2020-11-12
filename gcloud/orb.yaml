@@ -88,46 +88,49 @@ commands:
       - run: ln -s /root/google-cloud-sdk/bin/gsutil /usr/bin/gsutil
       - run: ln -s /root/google-cloud-sdk/bin/docker-credential-gcloud /usr/bin/docker-credential-gcloud
 
-  update-autoscaler:
+  patch-configmap-entry:
     description: >
-      Update an entry in the autoscaler dynamic configmap and reinitialize the
-      autoscaler to pick up the changes.
+      Update (or add) an entry in a configmap as a raw blob. Preserves all
+      other entries.
     parameters:
-      config:
-        description: >
-          Local file that contains the autoscaler config for your app.
-        type: string
       configmap:
         description: >
-          Name of the dynamically updatable autoscaler k8s configmap.
-        default: "autoscaler-config.d"
+          Name of the target k8s configmap.
         type: string
-      deployment_name:
+      entry_data:
         description: >
-          Name of the autoscaler k8s deployment.
-        default: "autoscaler"
+          File that contains the entry data.
         type: string
       entry_name:
         description: >
-          Define a unique name for the configmap entry that will contain the
-          autoscaler config for your deployment, which is one of such configmap
-          entries the autoscaler will load to form its total autoscaling
-          configuration. We recommend "<your_deployment_name>.yaml".
+          Name of the entry in the configmap which exists under the top-level
+          "data" entry.
         type: string
     steps:
       - run:
           name: construct configmap patch file
           command: |
-            # Avoid escaping issues by using autoscaler YAML as raw (|)
-            # directly from file. Must indent raw config (using sed here).
-            echo -e "data:\n  <<parameters.entry_name>>: |\n$(sed 's/^\(.*\)/    \1/g' <<parameters.config>>)" > patch.yaml
+            # Avoid escaping issues by using input data as raw (|) directly
+            # from file. Must indent raw config (using sed here).
+            echo -e "data:\n  <<parameters.entry_name>>: |\n$(sed 's/^\(.*\)/    \1/g' <<parameters.entry_data>>)" > patch.yaml
       - run:
-          name: update autoscaler entry in configmap
+          name: patch entry in configmap
           command: |
             kubectl patch configmap/<<parameters.configmap>> \
               --type merge -p "$(cat patch.yaml)"
+
+  force-redeploy-gke:
+    description: >
+      Force a k8s deployment to redeploy, which causes all pods to be
+      recreated.
+    parameters:
+      deployment_name:
+        description: >
+          Name of the k8s deployment.
+        type: string
+    steps:
       - run:
-          name: poke autoscaler to pick up configmap changes
+          name: poke deployment to force a redeploy
           command: |
             kubectl patch deployment <<parameters.deployment_name>> \
               -p '{"spec":{"template":{"metadata":{"annotations":{"date":"'$(date +'%s')'"}}}}}'
