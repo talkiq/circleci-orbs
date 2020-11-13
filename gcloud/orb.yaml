@@ -299,7 +299,7 @@ jobs:
           command: cat output
           when: always
 
-  deploy-gke-from-yaml:
+  deploy-gke:
     description: >
       Deploy a k8s deployment to GKE via provided YAML. Will record the
       previous deployment version in a workspace.
@@ -377,100 +377,6 @@ jobs:
                 name: deploy to k8s cluster
                 command: |
                   kubectl apply -f <<parameters.k8s_yaml>>
-      - persist_to_workspace:
-          root: /metadata
-          paths:
-            - prev_version/<<parameters.deployment>>/<<parameters.zone>>
-
-  deploy-gke:
-    description: >
-      Deploy a given image in GCR to GKE. Can be used in a lightweight "only
-      update the image" mode if ``from_template`` is unset (which will then not
-      need to checkout the source code) or do a "full deployment" by using
-      ``./bin/interpolate-k8s`` to build a ``k8s.yaml`` file otherwise.
-    docker:
-      - image: google/cloud-sdk:alpine
-    resource_class: <<parameters.resource_class>>
-    parameters:
-      creds:
-        default: GCLOUD_SERVICE_KEY
-        description: >
-          Name of environment variable storing the base64-encoded service key
-          for the GCP project.
-        type: env_var_name
-      cluster:
-        type: string
-      deployment:
-        description: >
-          Name of deployment to-be-updated.
-        type: string
-      from_template:
-        default: false
-        description: >
-          If enabled, checks out the code and uses ``./bin/interpolate-k8s`` to
-          do a full deployment from the k8s yaml template. Otherwise, simply
-          updated the image hash of the deployment.
-        type: boolean
-      template_path:
-        type: string
-        default: ./k8s.yaml.j2
-        description: >
-          Path to container specs file for use in ``./bin/interpolate-k8s``.
-      image:
-        default: ${CIRCLE_PROJECT_REPONAME}
-        description: >
-          Name of the target image. Note that this will be prepended by the
-          project name (eg. <<parameters.project>>), so the full path your
-          image will be pushed to will look like:
-          <<parameters.registry>>/<<parameters.project>>/<<parameters.image>>.
-        type: string
-      project:
-        description: >
-          Name of GCP project to which we will push.
-        type: string
-      registry:
-        default: 'gcr.io'
-        description: >
-          Container registry to-be-used.
-        type: string
-      resource_class:
-        default: small
-        type: string
-      tag:
-        default: ${CIRCLE_SHA1:0:10}
-        description: >
-          Tag to-be-deployed.
-        type: string
-      zone:
-        type: string
-    steps:
-      - when:
-          condition: <<parameters.from_template>>
-          steps:
-            - checkout
-      - auth:
-          creds: <<parameters.creds>>
-          project: <<parameters.project>>
-      - configure-gke:
-          cluster: <<parameters.cluster>>
-          zone: <<parameters.zone>>
-      - run: mkdir -p /metadata/prev_version/<<parameters.deployment>>
-      - run:
-          name: store previous version
-          command: |
-            kubectl get deployment <<parameters.deployment>> -oyaml \
-                | awk '/image: / {split($0,img,":"); print img[3]}' > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>> \
-                || echo 'unknown' > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>>
-      - when:
-          condition: <<parameters.from_template>>
-          steps:
-            - run: python3 -m ensurepip
-            - run: python3 -m pip install "docopt<1" "jinja2<3"
-            - run: python3 ./bin/interpolate-k8s --deployment="<<parameters.deployment>>" --template="<<parameters.template_path>>" "gcr.io/<<parameters.project>>/<<parameters.image>>" "<<parameters.tag>>" "$(kubectl get deployments <<parameters.deployment>> --template={{.status.replicas}})" | kubectl apply -f -
-      - unless:
-          condition: <<parameters.from_template>>
-          steps:
-            - run: kubectl set image deployment/<<parameters.deployment>> <<parameters.deployment>>="gcr.io/<<parameters.project>>/<<parameters.image>>:<<parameters.tag>>" --record=true
       - persist_to_workspace:
           root: /metadata
           paths:
