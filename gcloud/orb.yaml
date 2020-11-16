@@ -88,6 +88,53 @@ commands:
       - run: ln -s /root/google-cloud-sdk/bin/gsutil /usr/bin/gsutil
       - run: ln -s /root/google-cloud-sdk/bin/docker-credential-gcloud /usr/bin/docker-credential-gcloud
 
+  patch-configmap-entry:
+    description: >
+      Update (or add) an entry in a configmap as a raw blob. Preserves all
+      other entries.
+    parameters:
+      configmap:
+        description: >
+          Name of the target k8s configmap.
+        type: string
+      entry_data:
+        description: >
+          File that contains the entry data.
+        type: string
+      entry_name:
+        description: >
+          Name of the entry in the configmap which exists under the top-level
+          "data" entry.
+        type: string
+    steps:
+      - run:
+          name: construct configmap patch file
+          command: |
+            # Avoid escaping issues by using input data as raw (|) directly
+            # from file. Must indent raw config (using sed here).
+            echo -e "data:\n  <<parameters.entry_name>>: |\n$(sed 's/^\(.*\)/    \1/g' <<parameters.entry_data>>)" > patch.yaml
+      - run:
+          name: patch entry in configmap
+          command: |
+            kubectl patch configmap/<<parameters.configmap>> \
+              --type merge -p "$(cat patch.yaml)"
+
+  force-redeploy-gke:
+    description: >
+      Force a k8s deployment to redeploy, which causes all pods to be
+      recreated.
+    parameters:
+      deployment:
+        description: >
+          Name of the k8s deployment.
+        type: string
+    steps:
+      - run:
+          name: poke deployment to force a redeploy
+          command: |
+            kubectl patch deployment <<parameters.deployment>> \
+              -p '{"spec":{"template":{"metadata":{"annotations":{"date":"'$(date +'%s')'"}}}}}'
+
 jobs:
   deploy-cloud-function:
     description: >
@@ -254,70 +301,43 @@ jobs:
 
   deploy-gke:
     description: >
-      Deploy a given image in GCR to GKE. Can be used in a lightweight "only
-      update the image" mode if ``from_template`` is unset (which will then not
-      need to checkout the source code) or do a "full deployment" by using
-      ``./bin/interpolate-k8s`` to build a ``k8s.yaml`` file otherwise.
+      Deploy a k8s deployment to GKE via provided YAML. Will record the
+      previous deployment version in a workspace.
     docker:
       - image: google/cloud-sdk:alpine
-    resource_class: <<parameters.resource_class>>
     parameters:
-      creds:
-        default: GCLOUD_SERVICE_KEY
-        description: >
-          Name of environment variable storing the base64-encoded service key
-          for the GCP project.
-        type: env_var_name
       cluster:
         type: string
+      creds:
+        type: env_var_name
       deployment:
-        description: >
-          Name of deployment to-be-updated.
+        description:
+          Name of your deployment. If you are using multi-deployment
+          autoscaling this may correspond to multiple actual k8s deployments.
         type: string
-      from_template:
-        default: false
+      k8s_yaml:
         description: >
-          If enabled, checks out the code and uses ``./bin/interpolate-k8s`` to
-          do a full deployment from the k8s yaml template. Otherwise, simply
-          updated the image hash of the deployment.
-        type: boolean
-      template_path:
-        type: string
-        default: ./k8s.yaml.j2
-        description: >
-          Path to container specs file for use in ``./bin/interpolate-k8s``.
-      image:
-        default: ${CIRCLE_PROJECT_REPONAME}
-        description: >
-          Name of the target image. Note that this will be prepended by the
-          project name (eg. <<parameters.project>>), so the full path your
-          image will be pushed to will look like:
-          <<parameters.registry>>/<<parameters.project>>/<<parameters.image>>.
+          The k8s YAML file for your deployment(s).
         type: string
       project:
+        type: string
+      prune_selector:
         description: >
-          Name of GCP project to which we will push.
+          A k8s label selector to identify the k8s deployments that are
+          relevant to this deploy step, and prune those that aren't present in
+          the k8s YAML. Default is not to prune.
         type: string
-      registry:
-        default: 'gcr.io'
+        default: ""
+      version_selector:
         description: >
-          Container registry to-be-used.
+          A k8s label selector to identify which deployment should be recorded
+          as the previous deployment version for release notifications. If not
+          specified, the deployment name is used.
         type: string
-      resource_class:
-        default: small
-        type: string
-      tag:
-        default: ${CIRCLE_SHA1:0:10}
-        description: >
-          Tag to-be-deployed.
-        type: string
+        default: ""
       zone:
         type: string
     steps:
-      - when:
-          condition: <<parameters.from_template>>
-          steps:
-            - checkout
       - auth:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
@@ -325,22 +345,38 @@ jobs:
           cluster: <<parameters.cluster>>
           zone: <<parameters.zone>>
       - run: mkdir -p /metadata/prev_version/<<parameters.deployment>>
-      - run:
-          name: store previous version
-          command: |
-            kubectl get deployment <<parameters.deployment>> -oyaml \
-                | awk '/image: / {split($0,img,":"); print img[3]}' > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>> \
-                || echo 'unknown' > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>>
       - when:
-          condition: <<parameters.from_template>>
+          condition: <<parameters.version_selector>>
           steps:
-            - run: python3 -m ensurepip
-            - run: python3 -m pip install "docopt<1" "jinja2<3"
-            - run: python3 ./bin/interpolate-k8s --deployment="<<parameters.deployment>>" --template="<<parameters.template_path>>" "gcr.io/<<parameters.project>>/<<parameters.image>>" "<<parameters.tag>>" "$(kubectl get deployments <<parameters.deployment>> --template={{.status.replicas}})" | kubectl apply -f -
+            - run:
+                name: store previous version
+                command: |
+                  # Get the deployment image from the currently deployed k8s
+                  # manifest, parse out the tag as the last (3rd) chunk of img, and
+                  # further split the tag to retrieve the rightmost chunk: the commit
+                  # hash.
+                  kubectl get deployments -l <<parameters.version_selector>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>>
       - unless:
-          condition: <<parameters.from_template>>
+          condition: <<parameters.version_selector>>
           steps:
-            - run: kubectl set image deployment/<<parameters.deployment>> <<parameters.deployment>>="gcr.io/<<parameters.project>>/<<parameters.image>>:<<parameters.tag>>" --record=true
+            - run:
+                name: store previous version
+                command: |
+                  kubectl get deployments <<parameters.deployment>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>>
+      - when:
+          condition: <<parameters.prune_selector>>
+          steps:
+            - run:
+                name: deploy to k8s cluster
+                command: |
+                  kubectl apply -f <<parameters.k8s_yaml>> --prune -l <<parameters.prune_selector>>
+      - unless:
+          condition: <<parameters.prune_selector>>
+          steps:
+            - run:
+                name: deploy to k8s cluster
+                command: |
+                  kubectl apply -f <<parameters.k8s_yaml>>
       - persist_to_workspace:
           root: /metadata
           paths:
