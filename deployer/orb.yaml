@@ -35,8 +35,25 @@ jobs:
           being deployed does not match. Can be used as a last-step sanity
           check.
         type: string
+      should_upgrade_pip:
+        type: boolean
+        default: false
     steps:
       - checkout
+      - when:
+          condition: <<parameters.should_upgrade_pip>>
+          steps:
+            - run: python3 -m pip install --upgrade pip
+      - run:
+          name: Validate tag format for pip
+          shell: /usr/local/bin/python
+          command: |
+            import os
+            from pip._vendor.packaging.version import Version
+            tag = os.environ['CIRCLE_TAG']
+            v = Version(tag)
+            assert tag == str(v), f'Original tag ({tag}) should have been {str(v)}'
+            assert v.is_devrelease or not v.local, f'tag should not contain \'+{v.local}\' unless dev version'
       - run: python3 -m pip install wheel
       - run: cd "<<parameters.folder>>" && python3 setup.py sdist bdist_wheel
       - run:
