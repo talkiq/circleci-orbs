@@ -1,6 +1,85 @@
 version: 2.1
 description: "Tools for running deployment commands"
 
+commands:
+  validate-tag-for-pip:
+    description: >
+      Uses pips own Version parser to ensure semver semantics of the tag match
+      exactly with those used by pip.
+    parameters:
+      verify_version:
+        default: CIRCLE_TAG
+        description: >
+          The string or string-name of env var which holds the version string
+          to parse with pip Version
+        type: string
+      should_upgrade_pip:
+        type: boolean
+        default: false
+    steps:
+      - when:
+          condition: <<parameters.should_upgrade_pip>>
+          steps:
+            - run: python3 -m pip install --upgrade pip
+      - run:
+          name: Validate tag format for pip
+          shell: /usr/local/bin/python
+          command: |
+            import os
+            from pip._vendor.packaging.version import Version
+            try:
+              # See if verify_version is env var name holding version value
+              tag = os.environ['<<parameters.verify_version>>']
+            except KeyError:
+              # Check if verify_version itself was a version string
+              tag = '<<parameters.verify_version>>'
+            v = Version(tag)
+            assert tag == str(v), f'Original tag ({tag}) should have been {str(v)}'
+            assert v.is_devrelease or not v.local, f'tag should not contain \'+{v.local}\' unless dev version'
+
+  verify-tag-matches-deploy:
+    parameters:
+      folder:
+        default: '.'
+        description: >
+          Path to the folder containing the Python package.
+        type: string
+      verify_version:
+        default: CIRCLE_TAG
+        description: >
+          If set to a non-empty value, fails the deployment if the version
+          being deployed does not match. Can be used as a last-step sanity
+          check.
+        type: string
+    steps:
+      - run:
+          name: verify tag builds match deploy version
+          command: |
+            if [[ ! -z "${<<parameters.verify_version>>}" ]]; then
+                code_version=$(find "<<parameters.folder>>/dist" -iname '*.tar.gz' | awk -F- '{sub(/\.tar\.gz/, ""); print $NF}')
+                code_version_alt="${code_version/.dev/-dev.}"
+                if [[ <<parameters.verify_version>> != ${code_version} &&
+                      <<parameters.verify_version>> != ${code_version_alt} ]]; then
+                    echo "Version ${code_version} does not match tag ${<<parameters.verify_version>>}"
+                    exit 1
+                fi
+            fi
+
+  upload:
+    parameters:
+      folder:
+        default: '.'
+        description: >
+          Path to the folder containing the Python package.
+        type: string
+      gemfury_token:
+        default: GEMFURY_TOKEN
+        description: >
+          Name of the env var containing the Gemfury token.
+        type: env_var_name
+    steps:
+      - run: ls "<<parameters.folder>>/dist" | xargs -I{} curl -F package=@<<parameters.folder>>/dist/{} https://${<<parameters.gemfury_token>>}@push.fury.io/talkiq/
+
 jobs:
   gemfury:
     description: >
@@ -29,7 +108,7 @@ jobs:
         default: small
         type: string
       verify_version:
-        default: ${CIRCLE_TAG}
+        default: CIRCLE_TAG
         description: >
           If set to a non-empty value, fails the deployment if the version
           being deployed does not match. Can be used as a last-step sanity
@@ -40,32 +119,17 @@ jobs:
         default: false
     steps:
       - checkout
-      - when:
-          condition: <<parameters.should_upgrade_pip>>
-          steps:
-            - run: python3 -m pip install --upgrade pip
-      - run:
-          name: Validate tag format for pip
-          shell: /usr/local/bin/python
-          command: |
-            import os
-            from pip._vendor.packaging.version import Version
-            tag = os.environ['CIRCLE_TAG']
-            v = Version(tag)
-            assert tag == str(v), f'Original tag ({tag}) should have been {str(v)}'
-            assert v.is_devrelease or not v.local, f'tag should not contain \'+{v.local}\' unless dev version'
+      - validate-tag-for-pip:
+          should_upgrade_pip: <<parameters.should_upgrade_pip>>
+          verify_version: <<parameters.verify_version>>
       - run: python3 -m pip install wheel
       - run: cd "<<parameters.folder>>" && python3 setup.py sdist bdist_wheel
-      - run:
-          name: verify tag builds match deploy version
-          command: |
-            if [[ ! -z "<<parameters.verify_version>>" ]]; then
-                code_version=$(find "<<parameters.folder>>/dist" -iname '*.tar.gz' | awk -F- '{sub(/\.tar\.gz/, ""); print $NF}')
-                code_version_alt="${code_version/.dev/-dev.}"
-                if [[ <<parameters.verify_version>> != ${code_version} &&
-                      <<parameters.verify_version>> != ${code_version_alt} ]]; then
-                    echo "Version ${code_version} does not match tag ${CIRCLE_TAG}"
-                    exit 1
-                fi
-            fi
-      - run: ls "<<parameters.folder>>/dist" | xargs -I{} curl -F package=@<<parameters.folder>>/dist/{} https://${<<parameters.gemfury_token>>}@push.fury.io/talkiq/
+      - verify-tag-for-pip:
+          folder: <<parameters.folder>>
+          verify_version: <<parameters.verify_version>>
+      - verify-tag-matches-deploy:
+          folder: <<parameters.folder>>
+          verify_version: <<parameters.verify_version>>
+      - upload:
+          folder: <<parameters.folder>>
+          gemfury_token: <parameters.gemfury_token>>
