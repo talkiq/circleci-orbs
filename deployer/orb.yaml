@@ -43,7 +43,7 @@ jobs:
       - when:
           condition: <<parameters.should_upgrade_pip>>
           steps:
-            - run: python3 -m pip install --upgrade pip
+            - run: python3 -m pip install --upgrade "pip < 20.3.0"
       - run:
           name: Validate tag format for pip
           shell: /usr/local/bin/python
