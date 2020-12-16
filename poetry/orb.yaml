@@ -1,0 +1,91 @@
+version: 2.1
+description: "Tools for running poetry commands."
+
+jobs:
+  run:
+    description: >
+      Run an arbitrary command within your poetry environment.
+    docker:
+      - image: python:<<parameters.python_version>>
+    resource_class: <<parameters.resource_class>>
+    parameters:
+      cmd:
+        type: string
+      cwd:
+        default: '.'
+        description: >
+          Working directory for your package. Should point to a folder
+          containing your pyproject.toml file.
+        type: string
+      python_version:
+        default: latest
+        type: string
+      resource_class:
+        default: small
+        type: string
+    steps:
+      - run: python3 -m pip install poetry
+      - run: poetry config http-basic.fury $GEMFURY_TOKEN NOPASS
+      - checkout
+      - run:
+          command: poetry install -n
+          working_directory: <<parameters.cwd>>
+      - run:
+          command: poetry run <<parameters.cmd>>
+          working_directory: <<parameters.cwd>>
+
+  publish:
+    description: >
+      Publishes your package to the specified repository.
+    docker:
+      - image: python:<<parameters.python_version>>
+    resource_class: <<parameters.resource_class>>
+    parameters:
+      cwd:
+        default: '.'
+        description: >
+          Working directory for your package. Should point to a folder
+          containing your pyproject.toml file.
+        type: string
+      python_version:
+        default: latest
+        type: string
+      resource_class:
+        default: small
+        type: string
+      password:
+        description: >
+          Password to be used for authenticating against the specified
+          repository. Note that some indexes such as Gemfury use the username
+          field for your personal access token; in that case, set this value to
+          "NOPASS".
+        type: string
+      repository:
+        default: pypi
+        description: >
+          Name of the repository you wish to upload to. If using a non-default
+          repository, you'll need to define it in your pyproject.toml.
+        type: string
+      username:
+        description: >
+          Username to be used for authenticating against the specified
+          repository.
+        type: string
+    steps:
+      - run: python3 -m pip install poetry
+      - checkout
+      - run:
+          name: validate tag matches pyproject.toml
+          command:
+            if [[ "${CIRCLE_TAG}" != *"$(poetry version | cut -d ' ' -f2)"* ]]; then
+                echo "Version $(poetry version) does not match tag ${CIRCLE_TAG}";
+                exit 1;
+            fi
+          working_directory: <<parameters.cwd>>
+      - run:
+          command: poetry build
+          working_directory: <<parameters.cwd>>
+      - run:
+          name: poetry publish
+          command: poetry publish -r <<parameters.repository>> -u <<parameters.username>> -p <<parameters.password>>
+          working_directory: <<parameters.cwd>>

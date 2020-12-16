@@ -13,436 +13,50 @@ workflows:
             tags:
               only: /.*/
 
-      # ORB: deployer
       - orb-tools/lint:
-          name: lint-orbs-deployer
-          lint-dir: deployer
+          name: lint-orbs-<<matrix.lint-dir>>
+          matrix:
+            parameters:
+              lint-dir: [deployer, docs, docker, gcloud, linter, notifier, poetry, tester]
           filters:
             tags:
               only: /.*/
-      - orb-tools/pack:
-          name: pack-orbs-deployer
-          source-dir: deployer
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - linter/pre-commit
-            - lint-orbs-deployer
-      - orb-tools/publish-dev:
-          context: org-global
-          name: publish-dev-orbs-deployer
-          orb-name: talkiq/deployer
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - pack-orbs-deployer
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-deployer
-          orb-name: talkiq/deployer
-          release: patch
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /deployer-patch/
-          requires:
-            - publish-dev-orbs-deployer
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-deployer
-          orb-name: talkiq/deployer
-          release: minor
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /deployer-minor/
-          requires:
-            - publish-dev-orbs-deployer
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-deployer
-          orb-name: talkiq/deployer
-          release: major
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /deployer-major/
-          requires:
-            - publish-dev-orbs-deployer
 
-      # ORB: docs
-      - orb-tools/lint:
-          name: lint-orbs-docs
-          lint-dir: docs
-          filters:
-            tags:
-              only: /.*/
       - orb-tools/pack:
-          name: pack-orbs-docs
-          source-dir: docs
+          name: pack-orbs-talkiq/<<matrix.source-dir>>
+          matrix:
+            parameters:
+              source-dir: [deployer, docs, docker, gcloud, linter, notifier, poetry, tester]
           filters:
             tags:
               only: /.*/
           requires:
             - linter/pre-commit
-            - lint-orbs-docs
-      - orb-tools/publish-dev:
-          context: org-global
-          name: publish-dev-orbs-docs
-          orb-name: talkiq/docs
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - pack-orbs-docs
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-docs
-          orb-name: talkiq/docs
-          release: patch
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /docs-patch/
-          requires:
-            - publish-dev-orbs-docs
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-docs
-          orb-name: talkiq/docs
-          release: minor
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /docs-minor/
-          requires:
-            - publish-dev-orbs-docs
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-docs
-          orb-name: talkiq/docs
-          release: major
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /docs-major/
-          requires:
-            - publish-dev-orbs-docs
+            - lint-orbs-<<matrix.source-dir>>
 
-      # ORB: docker
-      - orb-tools/lint:
-          name: lint-orbs-docker
-          lint-dir: docker
-          filters:
-            tags:
-              only: /.*/
-      - orb-tools/pack:
-          name: pack-orbs-docker
-          source-dir: docker
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - linter/pre-commit
-            - lint-orbs-docker
       - orb-tools/publish-dev:
           context: org-global
-          name: publish-dev-orbs-docker
-          orb-name: talkiq/docker
+          name: publish-dev-orbs-<<matrix.orb-name>>
+          matrix:
+            parameters:
+              orb-name: [talkiq/deployer, talkiq/docs, talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry, talkiq/tester]
           filters:
             tags:
               only: /.*/
           requires:
-            - pack-orbs-docker
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-docker
-          orb-name: talkiq/docker
-          release: patch
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /docker-patch/
-          requires:
-            - publish-dev-orbs-docker
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-docker
-          orb-name: talkiq/docker
-          release: minor
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /docker-minor/
-          requires:
-            - publish-dev-orbs-docker
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-docker
-          orb-name: talkiq/docker
-          release: major
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /docker-major/
-          requires:
-            - publish-dev-orbs-docker
+            - pack-orbs-<<matrix.orb-name>>
 
-      # ORB: gcloud
-      - orb-tools/lint:
-          name: lint-orbs-gcloud
-          lint-dir: gcloud
-          filters:
-            tags:
-              only: /.*/
-      - orb-tools/pack:
-          name: pack-orbs-gcloud
-          source-dir: gcloud
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - linter/pre-commit
-            - lint-orbs-gcloud
-      - orb-tools/publish-dev:
-          context: org-global
-          name: publish-dev-orbs-gcloud
-          orb-name: talkiq/gcloud
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - pack-orbs-gcloud
       - orb-tools/dev-promote-prod:
           context: org-global
-          name: dev-promote-prod-orbs-gcloud
-          orb-name: talkiq/gcloud
-          release: patch
+          name: dev-promote-prod-orbs-<<matrix.orb-name>>-<<matrix.release>>
+          matrix:
+            parameters:
+              orb-name: [talkiq/deployer, talkiq/docs, talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry, talkiq/tester]
+              release: [patch, minor, major]
           filters:
             branches:
               ignore: /.*/
             tags:
-              only: /gcloud-patch/
+              only: /<<matrix.orb-name>>-<<matrix.release>>/
           requires:
-            - publish-dev-orbs-gcloud
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-gcloud
-          orb-name: talkiq/gcloud
-          release: minor
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /gcloud-minor/
-          requires:
-            - publish-dev-orbs-gcloud
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-gcloud
-          orb-name: talkiq/gcloud
-          release: major
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /gcloud-major/
-          requires:
-            - publish-dev-orbs-gcloud
-
-      # ORB: linter
-      - orb-tools/lint:
-          name: lint-orbs-linter
-          lint-dir: linter
-          filters:
-            tags:
-              only: /.*/
-      - orb-tools/pack:
-          name: pack-orbs-linter
-          source-dir: linter
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - linter/pre-commit
-            - lint-orbs-linter
-      - orb-tools/publish-dev:
-          context: org-global
-          name: publish-dev-orbs-linter
-          orb-name: talkiq/linter
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - pack-orbs-linter
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-linter
-          orb-name: talkiq/linter
-          release: patch
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /linter-patch/
-          requires:
-            - publish-dev-orbs-linter
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-linter
-          orb-name: talkiq/linter
-          release: minor
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /linter-minor/
-          requires:
-            - publish-dev-orbs-linter
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-linter
-          orb-name: talkiq/linter
-          release: major
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /linter-major/
-          requires:
-            - publish-dev-orbs-linter
-
-      # ORB: notifier
-      - orb-tools/lint:
-          name: lint-orbs-notifier
-          lint-dir: notifier
-          filters:
-            tags:
-              only: /.*/
-      - orb-tools/pack:
-          name: pack-orbs-notifier
-          source-dir: notifier
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - linter/pre-commit
-            - lint-orbs-notifier
-      - orb-tools/publish-dev:
-          context: org-global
-          name: publish-dev-orbs-notifier
-          orb-name: talkiq/notifier
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - pack-orbs-notifier
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-notifier
-          orb-name: talkiq/notifier
-          release: patch
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /notifier-patch/
-          requires:
-            - publish-dev-orbs-notifier
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-notifier
-          orb-name: talkiq/notifier
-          release: minor
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /notifier-minor/
-          requires:
-            - publish-dev-orbs-notifier
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-notifier
-          orb-name: talkiq/notifier
-          release: major
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /notifier-major/
-          requires:
-            - publish-dev-orbs-notifier
-
-      # ORB: tester
-      - orb-tools/lint:
-          name: lint-orbs-tester
-          lint-dir: tester
-          filters:
-            tags:
-              only: /.*/
-      - orb-tools/pack:
-          name: pack-orbs-tester
-          source-dir: tester
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - linter/pre-commit
-            - lint-orbs-tester
-      - orb-tools/publish-dev:
-          context: org-global
-          name: publish-dev-orbs-tester
-          orb-name: talkiq/tester
-          filters:
-            tags:
-              only: /.*/
-          requires:
-            - pack-orbs-tester
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-tester
-          orb-name: talkiq/tester
-          release: patch
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /tester-patch/
-          requires:
-            - publish-dev-orbs-tester
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-tester
-          orb-name: talkiq/tester
-          release: minor
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /tester-minor/
-          requires:
-            - publish-dev-orbs-tester
-      - orb-tools/dev-promote-prod:
-          context: org-global
-          name: dev-promote-prod-orbs-tester
-          orb-name: talkiq/tester
-          release: major
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /tester-major/
-          requires:
-            - publish-dev-orbs-tester
+            - publish-dev-orbs-<<matrix.orb-name>>
