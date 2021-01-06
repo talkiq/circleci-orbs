@@ -50,7 +50,7 @@ jobs:
           command: |
             import os
             from pip._vendor.packaging.version import Version
-            tag = os.environ['CIRCLE_TAG']
+            tag = os.popen('echo <<parameters.verify_version>>').read().strip()
             v = Version(tag)
             assert tag == str(v), f'Original tag ({tag}) should have been {str(v)}'
             assert v.is_devrelease or not v.local, f'tag should not contain \'+{v.local}\' unless dev version'
