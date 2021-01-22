@@ -397,6 +397,11 @@ jobs:
         description: >
           Extra flags to pass to docker build.
         type: string
+      custom-checkout:
+        default: ''
+        description: >
+          Pull repositories other than tooling for building.
+        type: string
       creds:
         default: GCLOUD_SERVICE_KEY
         description: >
@@ -457,7 +462,14 @@ jobs:
           project: <<parameters.project>>
       - configure-docker:
           docker_layer_caching: <<parameters.docker_layer_caching>>
-      - checkout
+      - when:
+          condition: <<parameters.custom-checkout>>
+          steps:
+            - run: git clone <<parameters.custom-checkout>>
+      - unless:
+          condition: <<parameters.custom-checkout>>
+          steps:
+            - checkout
       - docker/build:
           build_args: <<parameters.build_args>>
           dockerfile: <<parameters.dockerfile>>
