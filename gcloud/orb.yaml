@@ -397,6 +397,12 @@ jobs:
         description: >
           Extra flags to pass to docker build.
         type: string
+      git_repository_url:
+        default: ''
+        description: >
+          If unset, uses the current repository. Otherwise, clones the provided
+          repo's default branch to a depth of 1.
+        type: string
       creds:
         default: GCLOUD_SERVICE_KEY
         description: >
@@ -457,7 +463,14 @@ jobs:
           project: <<parameters.project>>
       - configure-docker:
           docker_layer_caching: <<parameters.docker_layer_caching>>
-      - checkout
+      - when:
+          condition: <<parameters.git_repository_url>>
+          steps:
+            - run: git clone --depth=1 <<parameters.git_repository_url>>
+      - unless:
+          condition: <<parameters.git_repository_url>>
+          steps:
+            - checkout
       - docker/build:
           build_args: <<parameters.build_args>>
           dockerfile: <<parameters.dockerfile>>
