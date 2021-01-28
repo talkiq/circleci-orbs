@@ -16,21 +16,22 @@ commands:
         description: |
           Optional alternate config file.
         type: string
-      pre_commit_version:
+      version:
+        default: latest
         description: |
           Pre-commit package version.
         type: string
     steps:
       - when:
           condition:
-            equal: [latest, <<parameters.pre_commit_version>>]
+            equal: [latest, <<parameters.version>>]
           steps:
             - run: python -m pip install --progress-bar=off pre-commit
       - unless:
           condition:
-            equal: [latest, <<parameters.pre_commit_version>>]
+            equal: [latest, <<parameters.version>>]
           steps:
-            - run: python -m pip install --progress-bar=off pre-commit==<<parameters.pre_commit_version>>
+            - run: python -m pip install --progress-bar=off pre-commit==<<parameters.version>>
       - checkout
       - restore_cache:
           keys:
@@ -76,4 +77,4 @@ jobs:
       - pre-commit:
           cache_prefix: <<parameters.python_version>>
           config_file: <<parameters.config_file>>
-          pre_commit_version: <<parameters.pre_commit_version>>
+          version: <<parameters.pre_commit_version>>
