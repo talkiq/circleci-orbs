@@ -16,8 +16,21 @@ commands:
         description: |
           Optional alternate config file.
         type: string
+      pre_commit_version:
+        description: |
+          Pre-commit package version.
+        type: string
     steps:
-      - run: python -m pip install --progress-bar=off pre-commit
+      - when:
+          condition:
+            equal: [latest, <<parameters.pre_commit_version>>]
+          steps:
+            - run: python -m pip install --progress-bar=off pre-commit
+      - unless:
+          condition:
+            equal: [latest, <<parameters.pre_commit_version>>]
+          steps:
+            - run: python -m pip install --progress-bar=off pre-commit==<<parameters.pre_commit_version>>
       - checkout
       - restore_cache:
           keys:
@@ -51,6 +64,11 @@ jobs:
         description: |
           The python version used to run pre-commit.
         type: string
+      pre_commit_version:
+        default: latest
+        description: |
+          Pre-commit package version.
+        type: string
       resource_class:
         default: small
         type: string
@@ -58,3 +76,4 @@ jobs:
       - pre-commit:
           cache_prefix: <<parameters.python_version>>
           config_file: <<parameters.config_file>>
+          pre_commit_version: <<parameters.pre_commit_version>>
