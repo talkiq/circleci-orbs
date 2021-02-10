@@ -28,7 +28,7 @@ jobs:
       - run: poetry config http-basic.fury $GEMFURY_TOKEN NOPASS
       - checkout
       - run:
-          command: poetry install -n
+          command: poetry install -n --no-ansi
           working_directory: <<parameters.cwd>>
       - run:
           command: poetry run <<parameters.cmd>>
