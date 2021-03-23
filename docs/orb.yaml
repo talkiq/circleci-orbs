@@ -98,6 +98,11 @@ jobs:
             gsutil -m rm -r gs://<<parameters.gcp_project>>-docs/<<parameters.project>>/ ||:
       - run: gsutil -m cp -r build/* gs://<<parameters.gcp_project>>-docs/<<parameters.project>>/
       # END TODO
+      # recreate archive with all docs
+      - run: mkdir docs
+      - run: gsutil -m cp -r gs://<<parameters.gcp_project>>-docs/ docs/
+      - run: tar -czvf docs.tar.gz docs
+      - run: gsutil -m cp docs.tar.gz gs://<<parameters.gcp_project>>-docs-archive/
 
 orbs:
   gcloud: talkiq/gcloud@1
