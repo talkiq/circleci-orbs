@@ -25,7 +25,7 @@ jobs:
         type: string
     steps:
       - run: python3 -m pip install poetry
-      - run: poetry config http-basic.fury $GEMFURY_TOKEN NOPASS
+      - run: poetry config http-basic.fury $GEMFURY_TOKEN $GEMFURY_TOKEN
       - checkout
       - run:
           command: poetry install -n --no-ansi
@@ -58,7 +58,7 @@ jobs:
           Password to be used for authenticating against the specified
           repository. Note that some indexes such as Gemfury use the username
           field for your personal access token; in that case, set this value to
-          "NOPASS".
+          the same value as the username.
         type: string
       repository:
         default: pypi
