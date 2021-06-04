@@ -502,6 +502,11 @@ jobs:
         description: >
           Name of the python image to use to execute the job.
         type: string
+      path:
+        default: .
+        description: >
+          Path to the directory containing your packages.
+        type: string
       project:
         description: >
           Name of GCP project to which we will push.
@@ -527,7 +532,7 @@ jobs:
           project: <<parameters.project>>
       - attach_workspace:
             at: <<parameters.workspace>>
-      - run: twine upload --repository-url <<parameters.repository-url>> <<parameters.workspace>>/dist/*
+      - run: twine upload --repository-url <<parameters.repository-url>> <<parameters.workspace>>/<<parameters.path>>/dist/*
 
 orbs:
   docker: talkiq/docker@2
