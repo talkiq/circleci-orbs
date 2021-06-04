@@ -483,5 +483,44 @@ jobs:
           image: <<parameters.project>>/<<parameters.image>>
           registry: <<parameters.registry>>
 
+  artifacts-package-publish:
+    description: >
+      This job will publish an already built package to a GCP package
+      repository.
+    docker:
+      - image: <<parameters.executor>>
+    resource_class: <<parameters.resource_class>>
+    parameters:
+      creds:
+        default: GCLOUD_SERVICE_KEY
+        description: >
+          Name of environment variable storing the base64-encoded service key
+          for the GCP project.
+        type: env_var_name
+      executor:
+        default: python:3.7.10
+        description: >
+          Name of the python image to use to execute the job.
+        type: string
+      path:
+        default: .
+        description: >
+          Path to the directory containing your packages.
+        type: string
+      repository-url:
+        description: >
+          URL of GCP package repository to which we will push.
+        type: string
+      resource_class:
+        default: medium
+        type: string
+    steps:
+      - run: pip install twine keyring keyrings.google-artifactregistry-auth
+      - install
+      - auth:
+          creds: <<parameters.creds>>
+          project: <<parameters.project>>
+      - run: twine upload --repository-url <<parameters.repository-url>> <<parameters.path>>/dist/*
+
 orbs:
   docker: talkiq/docker@2
