@@ -507,12 +507,16 @@ jobs:
         description: >
           Path to the directory containing your packages.
         type: string
-      repository-url:
+      project:
         description: >
-          URL of GCP package repository to which we will push.
+          Name of GCP project to which we will push.
         type: string
       resource_class:
         default: medium
+        type: string
+      repository-url:
+        description: >
+          URL of GCP package repository to which we will push.
         type: string
     steps:
       - run: pip install twine keyring keyrings.google-artifactregistry-auth
