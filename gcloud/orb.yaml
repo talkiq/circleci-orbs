@@ -519,7 +519,7 @@ jobs:
           URL of GCP package repository to which we will push.
         type: string
       workspace:
-        default: '/tmp/poetry_build'
+        default: '/tmp/build_dir'
         description: >
           If specified, attaches the specified workspace and copies it into the
           image context before building.
