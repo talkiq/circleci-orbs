@@ -502,11 +502,6 @@ jobs:
         description: >
           Name of the python image to use to execute the job.
         type: string
-      path:
-        default: .
-        description: >
-          Path to the directory containing your packages.
-        type: string
       project:
         description: >
           Name of GCP project to which we will push.
@@ -518,13 +513,21 @@ jobs:
         description: >
           URL of GCP package repository to which we will push.
         type: string
+      workspace:
+        default: '/tmp/poetry_build'
+        description: >
+          If specified, attaches the specified workspace and copies it into the
+          image context before building.
+        type: string
     steps:
       - run: pip install twine keyring keyrings.google-artifactregistry-auth
       - install
       - auth:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
-      - run: twine upload --repository-url <<parameters.repository-url>> <<parameters.path>>/dist/*
+      - attach_workspace:
+            at: <<parameters.workspace>>
+      - run: twine upload --repository-url <<parameters.repository-url>> <<parameters.workspace>>/dist/*
 
 orbs:
   docker: talkiq/docker@2
