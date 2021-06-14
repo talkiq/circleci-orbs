@@ -166,7 +166,6 @@ commands:
         type: string
     steps:
       - run: python3 -m pip install twine keyring keyrings.google-artifactregistry-auth
-      - install
       - auth:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
