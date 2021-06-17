@@ -207,7 +207,7 @@ jobs:
             and: [<<parameters.gcr_creds>>, <<parameters.gcr_project>>]
           steps:
             - setup_remote_docker:
-                version: 19.03.12
+                version: 20.10.6
       - checkout
       - run:
           working_directory: <<parameters.cwd>>
