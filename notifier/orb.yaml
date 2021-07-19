@@ -18,6 +18,11 @@ jobs:
         description: |
           Name of the environment variable containing your Datadog API key.
         type: env_var_name
+      domain:
+        default: "api.datadoghq.com"
+        description: |
+          Domain name of the Datadog ingestion API.
+        type: string
       tag:
         default: ""
         description: |
@@ -37,7 +42,7 @@ jobs:
           curl -XPOST \
             -H "Content-Type: application/json" \
             -d '{"title": "'"<<parameters.title>>"'", "text": "'"<<parameters.text>>"'", "tags": ["'"<<parameters.tag>>"'"], "alert_type": "success"}' \
-            "https://api.datadoghq.com/api/v1/events?api_key=${<<parameters.api_key>>}"
+            "https://<<parameters.domain>>/api/v1/events?api_key=${<<parameters.api_key>>}"
 
   sentry-deployment:
     description: |
