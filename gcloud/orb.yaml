@@ -59,10 +59,36 @@ commands:
     parameters:
       cluster:
         type: string
+      kubectl_version:
+        default: "gcloud-latest"
+        description: |
+          kubectl version to be installed. Defaults to "gcloud-latest", ie. the version returned by installing as a gcloud component. You can specify the version string (eg. "v1.21.3") or "latest" to get a different version without going through gcloud components.
+        type: string
       zone:
         type: string
     steps:
-      - run: echo y | gcloud components install kubectl
+      - when:
+          condition:
+            equal: [ <<parameters.kubectl_version>>, "gcloud-latest" ]
+          steps:
+            - run: echo y | gcloud components install kubectl
+      - when:
+          condition:
+            equal: [ <<parameters.kubectl_version>>, "latest" ]
+          steps:
+            - run: curl -Lso/tmp/kubectl-version https://dl.k8s.io/release/stable.txt
+            - run: curl -Lo/tmp/kubectl "https://dl.k8s.io/release/$(cat /tmp/kubectl-version)/bin/linux/amd64/kubectl"
+            - run: install -o root -g root -m 0755 /tmp/kubectl /usr/local/bin/kubectl
+      - when:
+          condition:
+            not:
+              or:
+                - equal: [ <<parameters.kubectl_version>>, "gcloud-latest" ]
+                - equal: [ <<parameters.kubectl_version>>, "latest" ]
+          steps:
+            - run: curl -Lo/tmp/kubectl "https://dl.k8s.io/release/<<parameters.kubectl_version>>/bin/linux/amd64/kubectl"
+            - run: install -o root -g root -m 0755 /tmp/kubectl /usr/local/bin/kubectl
+      - run: kubectl version --client
       - run: gcloud config set container/cluster <<parameters.cluster>>
       - run: gcloud container clusters get-credentials <<parameters.cluster>> --zone=<<parameters.zone>>
 
