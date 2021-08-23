@@ -508,6 +508,11 @@ jobs:
         description: >
           Path to the build context directory containing your Dockerfile.
         type: string
+      pre_build_steps:
+        default: []
+        description: >
+          Pre-steps to be executed after gcloud authentication
+        type: steps
       project:
         description: >
           Name of GCP project to which we will push.
@@ -541,6 +546,7 @@ jobs:
           condition: <<parameters.git_repository_url>>
           steps:
             - checkout
+      - steps: <<parameters.pre_build_steps>>
       - docker/build:
           build_args: <<parameters.build_args>>
           dockerfile: <<parameters.dockerfile>>
