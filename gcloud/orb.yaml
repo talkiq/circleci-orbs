@@ -208,9 +208,9 @@ commands:
 jobs:
   artifact-registry-publish-python-package:
     description: >
-      Publish Python package to Artifact Registry package repository
+      Publish Python package to Artifact Registry package repository from workspace.
     docker:
-      - image: python:3.7.10
+      - image: python:<<parameters.python_version>>
     resource_class: <<parameters.resource_class>>
     parameters:
       creds:
@@ -219,19 +219,26 @@ jobs:
           Name of environment variable storing the base64-encoded service key
           for the GCP project.
         type: env_var_name
+      cwd:
+        default: '.'
+        description: >
+          Working directory containing 'dist'.
       files:
         default: '*'
         description: >
           Glob pattern of files to upload
         type: string
       path:
-        default: '/tmp/workspaces/dist'
+        default: 'dist'
         description: >
           Path to the directory containing your packages.
         type: string
       project:
         description: >
           Name of GCP project to which we will push.
+        type: string
+      python_version:
+        default: latest
         type: string
       repository-url:
         description: >
@@ -240,11 +247,6 @@ jobs:
       resource_class:
         default: small
         type: string
-      workspace:
-        default: '/tmp/workspaces'
-        description: >
-          Workspace to retrieve packages from
-        type: string
     steps:
       - run: python3 -m pip install twine keyring keyrings.google-artifactregistry-auth
       - install
@@ -252,15 +254,19 @@ jobs:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
       - attach_workspace:
-            at: <<parameters.workspace>>
-      - run: |
-          unset TWINE_PASSWORD
-          unset TWINE_USERNAME
-          unset TWINE_REPOSITORY
-          unset TWINE_REPOSITORY_URL
-          unset TWINE_CERT
-          unset TWINE_NON_INTERACTIVE
-          twine upload --repository-url <<parameters.repository-url>> <<parameters.path>>/<<parameters.files>>
+            at: <<parameters.cwd>>
+      - run:
+          name: Upload package from workspace
+          command: |
+            unset TWINE_PASSWORD
+            unset TWINE_USERNAME
+            unset TWINE_REPOSITORY
+            unset TWINE_REPOSITORY_URL
+            unset TWINE_CERT
+            unset TWINE_NON_INTERACTIVE
+            twine upload --repository-url <<parameters.repository-url>> <<parameters.path>>/<<parameters.files>>
+          working_directory: <<parameters.cwd>>
+
   deploy-cloud-function:
     description: >
       Deploy a package to Google's Cloud Function service.

@@ -4,7 +4,7 @@ description: "Tools for running poetry commands."
 jobs:
   build:
     description: >
-      Publishes your package to the specified repository.
+      Build your package and store to shared workspace.
     docker:
       - image: python:<<parameters.python_version>>
     resource_class: <<parameters.resource_class>>
@@ -21,11 +21,6 @@ jobs:
       resource_class:
         default: small
         type: string
-      workspace:
-        default: '/tmp/workspaces'
-        description: >
-          Workspace to retrieve packages from
-        type: string
     steps:
       - run: python3 -m pip install poetry
       - checkout
@@ -40,11 +35,8 @@ jobs:
       - run:
           command: poetry build
           working_directory: <<parameters.cwd>>
-      - run: |
-          mkdir -p <<parameters.workspace>>
-          cp -r dist <<parameters.workspace>>/dist
       - persist_to_workspace:
-          root: <<parameters.workspace>>
+          root: <<parameters.cwd>>
           paths:
             - dist
 
