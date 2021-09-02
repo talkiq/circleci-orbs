@@ -223,6 +223,7 @@ jobs:
         default: '.'
         description: >
           Working directory containing 'dist'.
+        type: string
       files:
         default: '*'
         description: >
