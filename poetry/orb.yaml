@@ -2,44 +2,6 @@ version: 2.1
 description: "Tools for running poetry commands."
 
 jobs:
-  build:
-    description: >
-      Build your package and store to shared workspace.
-    docker:
-      - image: python:<<parameters.python_version>>
-    resource_class: <<parameters.resource_class>>
-    parameters:
-      cwd:
-        default: '.'
-        description: >
-          Working directory for your package. Should point to a folder
-          containing your pyproject.toml file.
-        type: string
-      python_version:
-        default: latest
-        type: string
-      resource_class:
-        default: small
-        type: string
-    steps:
-      - run: python3 -m pip install poetry
-      - checkout
-      - run:
-          name: validate tag matches pyproject.toml
-          command:
-            if [[ "${CIRCLE_TAG}" != *"$(poetry version | cut -d ' ' -f2)"* ]]; then
-                echo "Version $(poetry version) does not match tag ${CIRCLE_TAG}";
-                exit 1;
-            fi
-          working_directory: <<parameters.cwd>>
-      - run:
-          command: poetry build
-          working_directory: <<parameters.cwd>>
-      - persist_to_workspace:
-          root: <<parameters.cwd>>
-          paths:
-            - dist
-
   run:
     description: >
       Run an arbitrary command within your poetry environment.
