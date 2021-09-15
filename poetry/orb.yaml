@@ -64,7 +64,8 @@ jobs:
         default: pypi
         description: >
           Name of the repository you wish to upload to. If using a non-default
-          repository, you'll need to define it in your pyproject.toml.
+          repository, you'll need to define it in your pyproject.toml or
+          provide a URL with the repository-url parameters.
         type: string
       repository-url:
         description: >
