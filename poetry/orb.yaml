@@ -68,6 +68,7 @@ jobs:
           provide a URL with the repository-url parameters.
         type: string
       repository-url:
+        default: ''
         description: >
           URL of repository not provided in pyproject.toml. Uses repository
           parameter as name of repository for configuration.
