@@ -66,6 +66,11 @@ jobs:
           Name of the repository you wish to upload to. If using a non-default
           repository, you'll need to define it in your pyproject.toml.
         type: string
+      repository-url:
+        description: >
+          URL of repository not provided in pyproject.toml. Uses repository
+          parameter as name of repository for configuration.
+        type: string
       username:
         description: >
           Username to be used for authenticating against the specified
@@ -85,6 +90,10 @@ jobs:
       - run:
           command: poetry build
           working_directory: <<parameters.cwd>>
+      - when:
+          condition: << parameters.repository-url >>
+          steps:
+            - run: poetry config repositories.<<parameters.repository>> <<parameters.repository-url>>
       - run:
           name: poetry publish
           command: poetry publish -r <<parameters.repository>> -u <<parameters.username>> -p <<parameters.password>>
