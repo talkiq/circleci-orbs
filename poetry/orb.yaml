@@ -17,15 +17,30 @@ jobs:
           Working directory for your package. Should point to a folder
           containing your pyproject.toml file.
         type: string
+      password:
+        default: $GEMFURY_TOKEN
+        description: >
+          The password used to authenticate the repository-name.
       python_version:
         default: latest
+        type: string
+      repository-name:
+        default: fury
+        description: >
+          Name of the repository to be used for pulling packages. Should
+          match name of source repository in the pyproject.toml file.
         type: string
       resource_class:
         default: small
         type: string
+      username:
+        default: $GEMFURY_TOKEN
+        description: >
+          The username used to authenticate the repository-name.
+        type: string
     steps:
       - run: python3 -m pip install poetry
-      - run: poetry config http-basic.fury $GEMFURY_TOKEN $GEMFURY_TOKEN
+      - run: poetry config http-basic.<<parameters.repository-name>> <<parameters.username>> <<parameters.password>>
       - checkout
       - run:
           command: poetry install -n --no-ansi
