@@ -11,6 +11,21 @@ jobs:
     parameters:
       cmd:
         type: string
+      configure_poetry:
+        description: >
+          If there are any configurations that must occur prior to running
+          poetry, use this parameter to specify them over pre-steps. This
+          parameter runs immediately after poetry's installation, but before
+          any business logic.
+
+          In other words, you may want to set this value to something like:
+          ```
+          - run: python3 -m pip install keyring keyrings.google-artifactregistry-auth
+          - run: poetry config http-basic.repo-name username password
+          - run: poetry config repositories.backup-repo url
+          ```
+        type: steps
+        default: []
       cwd:
         default: '.'
         description: >
@@ -25,7 +40,7 @@ jobs:
         type: string
     steps:
       - run: python3 -m pip install poetry
-      - run: poetry config http-basic.fury $GEMFURY_TOKEN $GEMFURY_TOKEN
+      - steps: <<parameters.configure_poetry>>
       - checkout
       - run:
           command: poetry install -n --no-ansi
@@ -65,9 +80,9 @@ jobs:
         description: >
           Name of the repository you wish to upload to. If using a non-default
           repository, you'll need to define it in your pyproject.toml or
-          provide a URL with the repository-url parameters.
+          provide a URL with the repository_url parameters.
         type: string
-      repository-url:
+      repository_url:
         default: ''
         description: >
           URL of repository not provided in pyproject.toml. Uses repository
@@ -93,9 +108,9 @@ jobs:
           command: poetry build
           working_directory: <<parameters.cwd>>
       - when:
-          condition: << parameters.repository-url >>
+          condition: << parameters.repository_url >>
           steps:
-            - run: poetry config repositories.<<parameters.repository>> <<parameters.repository-url>>
+            - run: poetry config repositories.<<parameters.repository>> <<parameters.repository_url>>
       - run:
           name: poetry publish
           command: poetry publish -r <<parameters.repository>> -u <<parameters.username>> -p <<parameters.password>>
