@@ -17,30 +17,26 @@ jobs:
           Working directory for your package. Should point to a folder
           containing your pyproject.toml file.
         type: string
-      password:
-        default: $GEMFURY_TOKEN
-        description: >
-          The password used to authenticate the repository-name.
       python_version:
         default: latest
         type: string
-      repository-name:
-        default: fury
+      poetry_http_basic_configurations:
+        default: ''
         description: >
-          Name of the repository to be used for pulling packages. Should
-          match name of source repository in the pyproject.toml file.
+          A semicolon separated list of triplets used to configure
+          poetry's HTTP basic authentication. Order is as follows:
+
+          repository_name[,] username[,] password[;]
+
+          Spaces are required between values. Commas and semicolons
+          are to improve triplet readability.
         type: string
       resource_class:
         default: small
         type: string
-      username:
-        default: $GEMFURY_TOKEN
-        description: >
-          The username used to authenticate the repository-name.
-        type: string
     steps:
       - run: python3 -m pip install poetry
-      - run: poetry config http-basic.<<parameters.repository-name>> <<parameters.username>> <<parameters.password>>
+      - run: echo "<<parameters.poetry_http_basic_configurations>>" | xargs -r -n 3 bash -c 'poetry config http-basic.${0%,*} ${1%,*} ${2%;*}'
       - checkout
       - run:
           command: poetry install -n --no-ansi
@@ -80,9 +76,9 @@ jobs:
         description: >
           Name of the repository you wish to upload to. If using a non-default
           repository, you'll need to define it in your pyproject.toml or
-          provide a URL with the repository-url parameters.
+          provide a URL with the repository_url parameters.
         type: string
-      repository-url:
+      repository_url:
         default: ''
         description: >
           URL of repository not provided in pyproject.toml. Uses repository
@@ -108,9 +104,9 @@ jobs:
           command: poetry build
           working_directory: <<parameters.cwd>>
       - when:
-          condition: << parameters.repository-url >>
+          condition: << parameters.repository_url >>
           steps:
-            - run: poetry config repositories.<<parameters.repository>> <<parameters.repository-url>>
+            - run: poetry config repositories.<<parameters.repository>> <<parameters.repository_url>>
       - run:
           name: poetry publish
           command: poetry publish -r <<parameters.repository>> -u <<parameters.username>> -p <<parameters.password>>
