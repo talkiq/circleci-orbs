@@ -110,10 +110,22 @@ commands:
               echo >&2 "ERROR: could not find supported package manager"
               exit 1
             fi
-      - run: curl -sSL https://sdk.cloud.google.com | bash -s -- --disable-prompts
-      - run: ln -s /root/google-cloud-sdk/bin/gcloud /usr/bin/gcloud
-      - run: ln -s /root/google-cloud-sdk/bin/gsutil /usr/bin/gsutil
-      - run: ln -s /root/google-cloud-sdk/bin/docker-credential-gcloud /usr/bin/docker-credential-gcloud
+      - run: |
+          if [ ! -d /root/google-cloud-sdk ]; then
+            curl -sSL https://sdk.cloud.google.com | bash -s -- --disable-prompts
+          fi
+      - run: |
+          if [ ! -f /usr/bin/gcloud ]; then
+            ln -s /root/google-cloud-sdk/bin/gcloud /usr/bin/gcloud
+          fi
+      - run: |
+          if [ ! -f /usr/bin/gsutil ]; then
+            ln -s /root/google-cloud-sdk/bin/gsutil /usr/bin/gsutil
+          fi
+      - run: |
+          if [ ! -f /usr/bin/docker-credential-gcloud ]; then
+            ln -s /root/google-cloud-sdk/bin/docker-credential-gcloud /usr/bin/docker-credential-gcloud
+          fi
 
   patch-configmap-entry:
     description: >
