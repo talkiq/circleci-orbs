@@ -11,6 +11,21 @@ jobs:
     parameters:
       cmd:
         type: string
+      configure_poetry:
+        description: >
+          If there are any configurations that must occur prior to running
+          poetry, use this parameter to specify them over pre-steps. This
+          parameter runs immediately after poetry's installation, but before
+          any business logic.
+
+          In other words, you may want to set this value to something like:
+          ```
+          - run: python3 -m pip install keyring keyrings.google-artifactregistry-auth
+          - run: poetry config http-basic.repo-name username password
+          - run: poetry config repositories.backup-repo url
+          ```
+        type: steps
+        default: []
       cwd:
         default: '.'
         description: >
@@ -20,23 +35,12 @@ jobs:
       python_version:
         default: latest
         type: string
-      poetry_http_basic_configurations:
-        default: ''
-        description: >
-          A semicolon separated list of triplets used to configure
-          poetry's HTTP basic authentication. Order is as follows:
-
-          repository_name[,] username[,] password[;]
-
-          Spaces are required between values. Commas and semicolons
-          are to improve triplet readability.
-        type: string
       resource_class:
         default: small
         type: string
     steps:
       - run: python3 -m pip install poetry
-      - run: echo "<<parameters.poetry_http_basic_configurations>>" | xargs -r -n 3 bash -c 'poetry config http-basic.${0%,*} ${1%,*} ${2%;*}'
+      - steps: <<parameters.configure_poetry>>
       - checkout
       - run:
           command: poetry install -n --no-ansi
