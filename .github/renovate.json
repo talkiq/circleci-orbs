@@ -1,6 +1,6 @@
 {
   "extends": ["github>talkiq/common"],
-  "orbs": {
+  "circleci": {
     "fileMatch": ["(^|/)orb\\.ya?ml$"]
   }
 }
