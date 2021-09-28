@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  orb-tools: circleci/orb-tools@8.27.0
+  orb-tools: circleci/orb-tools@8
   linter: talkiq/linter@volatile
 
 workflows:
