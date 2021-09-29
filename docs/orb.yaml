@@ -100,4 +100,4 @@ jobs:
       # END TODO
 
 orbs:
-  gcloud: talkiq/gcloud@1
+  gcloud: talkiq/gcloud@6
