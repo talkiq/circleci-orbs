@@ -153,6 +153,10 @@ jobs:
         description: |
           Services to build besides target service
         type: string
+      build_args:
+        default: ''
+        description: >
+          Docker-compose build args such as build enviornment variables.
       cwd:
         default: '.'
         description: >
@@ -212,7 +216,7 @@ jobs:
       - run:
           working_directory: <<parameters.cwd>>
           # has to be built explicitly https://github.com/docker/compose/issues/7336
-          command: docker-compose <<parameters.compose_args>> build <<parameters.service_name>> <<parameters.build>>
+          command: docker-compose <<parameters.compose_args>> build <<parameters.build_args>> <<parameters.service_name>> <<parameters.build>>
           environment:
             DOCKER_BUILDKIT: 1
             COMPOSE_DOCKER_CLI_BUILD: 1
