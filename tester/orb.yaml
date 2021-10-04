@@ -157,6 +157,7 @@ jobs:
         default: ''
         description: >
           Docker-compose build args such as build enviornment variables.
+        type: string
       cwd:
         default: '.'
         description: >
