@@ -71,7 +71,7 @@ commands:
           condition:
             equal: [ <<parameters.kubectl_version>>, "gcloud-latest" ]
           steps:
-            - run: echo y | gcloud components install kubectl
+            - run: gcloud components install --quiet kubectl
             - run: ln -s /root/google-cloud-sdk/bin/kubectl /usr/local/bin/kubectl
       - when:
           condition:
