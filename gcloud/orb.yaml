@@ -255,17 +255,22 @@ jobs:
       - auth:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
-      - run: apk add --no-cache --no-progress zip
+      - run: apk add --no-cache --no-progress py3-pip zip
+      - run: python3 -m pip install poetry
+      - run: poetry config http-basic.fury $GEMFURY_TOKEN $GEMFURY_TOKEN
       - checkout
+      - run:
+          name: generate requirements
+          command: poetry export -frequirements.txt -orequirements.txt --without-hashes --with-credentials
+          working_directory: functions/<<parameters.packagename>>
       - run:
           name: restructure files for target package
           command: |
-            cd functions/
             mkdir -p /tmp/build
             cp "./<<parameters.packagename>>/requirements.txt" requirements.txt
             cp "./<<parameters.packagename>>/mains/<<parameters.funcname>>.py" main.py
-            sed -i "s/\${GEMFURY_TOKEN}/$GEMFURY_TOKEN/g" requirements.txt
             cp -R "./<<parameters.packagename>>" main.py requirements.txt /tmp/build
+          working_directory: functions
       - when:
           condition: <<parameters.memory>>
           steps:
