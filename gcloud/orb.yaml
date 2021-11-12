@@ -249,7 +249,6 @@ jobs:
       memory:
         description: >
           Limit on the amount of memory the function can use. Allowed values are: 128MB, 256MB, 512MB, 1024MB, and 2048MB.
-        default: 128MB
         type: string
     steps:
       - auth:
@@ -266,9 +265,19 @@ jobs:
             sed -i "s/\${GEMFURY_TOKEN}/$GEMFURY_TOKEN/g" requirements.txt
             zip -r "<<parameters.funcname>>.zip" "./<<parameters.packagename>>"/* main.py requirements.txt
             gsutil cp "<<parameters.funcname>>.zip" "gs://<<parameters.project>>-cloud-function-zips/<<parameters.packagename>>/"
-      - run: |
-          gcloud functions deploy <<parameters.funcname>> --memory=<<parameters.memory>> \
-            --source="gs://<<parameters.project>>-cloud-function-zips/<<parameters.packagename>>/<<parameters.funcname>>.zip"
+
+      - when:
+          condition: <<parameters.memory>>
+          steps:
+            - run: |
+                gcloud functions deploy <<parameters.funcname>> --memory=<<parameters.memory>> \
+                  --source="gs://<<parameters.project>>-cloud-function-zips/<<parameters.packagename>>/<<parameters.funcname>>.zip"
+      - unless:
+          condition: <<parameters.memory>>
+          steps:
+            - run: |
+                gcloud functions deploy <<parameters.funcname>> \
+                  --source="gs://<<parameters.project>>-cloud-function-zips/<<parameters.packagename>>/<<parameters.funcname>>.zip"
 
   deploy-cloud-run:
     description: >
