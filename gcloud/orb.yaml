@@ -237,7 +237,7 @@ jobs:
         type: string
       packagename:
         description: >
-          Name of the package to be deployed to this cloud function. This package should be a .zip
+          Name of the package to be deployed to this cloud function.
         type: string
       project:
         description: >
@@ -247,9 +247,9 @@ jobs:
         default: small
         type: string
       memory:
+        default: ''
         description: >
           Limit on the amount of memory the function can use. Allowed values are: 128MB, 256MB, 512MB, 1024MB, and 2048MB.
-        default: 128MB
         type: string
     steps:
       - auth:
@@ -258,17 +258,25 @@ jobs:
       - run: apk add --no-cache --no-progress zip
       - checkout
       - run:
-          name: package function source as zip and upload to gcs
+          name: restructure files for target package
           command: |
             cd functions/
+            mkdir -p /tmp/build
             cp "./<<parameters.packagename>>/requirements.txt" requirements.txt
             cp "./<<parameters.packagename>>/mains/<<parameters.funcname>>.py" main.py
             sed -i "s/\${GEMFURY_TOKEN}/$GEMFURY_TOKEN/g" requirements.txt
-            zip -r "<<parameters.funcname>>.zip" "./<<parameters.packagename>>"/* main.py requirements.txt
-            gsutil cp "<<parameters.funcname>>.zip" "gs://<<parameters.project>>-cloud-function-zips/<<parameters.packagename>>/"
-      - run: |
-          gcloud functions deploy <<parameters.funcname>> --memory=<<parameters.memory>> \
-            --source="gs://<<parameters.project>>-cloud-function-zips/<<parameters.packagename>>/<<parameters.funcname>>.zip"
+            cp -R "./<<parameters.packagename>>" main.py requirements.txt /tmp/build
+      - when:
+          condition: <<parameters.memory>>
+          steps:
+            - run: |
+                gcloud functions deploy <<parameters.funcname>> --memory=<<parameters.memory>> \
+                  --source="/tmp/build"
+      - unless:
+          condition: <<parameters.memory>>
+          steps:
+            - run: |
+                gcloud functions deploy <<parameters.funcname>> --source="/tmp/build"
 
   deploy-cloud-run:
     description: >
