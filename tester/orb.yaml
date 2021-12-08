@@ -175,7 +175,7 @@ jobs:
           for the GCP project.
         type: env_var_name
       executor:
-        default: cimg/base:stable-20.04
+        default: cimg/base:2021.11-20.04
         description: >
           Name of the docker image to use to execute the job.
         type: string
