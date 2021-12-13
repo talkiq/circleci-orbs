@@ -137,7 +137,7 @@ jobs:
 
   docker-compose:
     description:
-      Runs docker-compose service
+      Runs Docker Compose service (V2)
     docker:
       - image: <<parameters.executor>>
         user: <<parameters.user>>
@@ -161,12 +161,12 @@ jobs:
       cwd:
         default: '.'
         description: >
-          Working directory used when running docker-compose commands.
+          Working directory used when running Docker Compose commands.
         type: string
       compose_args:
         default: '-f docker-compose.yaml'
         description: >
-          Docker-compose args such as a chain of files to use.
+          Docker Compose args such as a chain of files to use.
         type: string
       gcr_creds:
         default: GCLOUD_SERVICE_KEY
@@ -175,7 +175,7 @@ jobs:
           for the GCP project.
         type: env_var_name
       executor:
-        default: cimg/base:2021.11-20.04
+        default: cimg/base:stable-20.04
         description: >
           Name of the docker image to use to execute the job.
         type: string
@@ -195,7 +195,7 @@ jobs:
         type: string
       service_name:
         description: >
-          Name of docker-compose service to run
+          Name of Docker Compose service to run
         type: string
     steps:
       - when:
@@ -217,20 +217,20 @@ jobs:
       - run:
           working_directory: <<parameters.cwd>>
           # has to be built explicitly https://github.com/docker/compose/issues/7336
-          command: docker-compose <<parameters.compose_args>> build <<parameters.build_options>> <<parameters.service_name>> <<parameters.build>>
+          command: docker compose <<parameters.compose_args>> build <<parameters.build_options>> <<parameters.service_name>> <<parameters.build>>
           environment:
             DOCKER_BUILDKIT: 1
             COMPOSE_DOCKER_CLI_BUILD: 1
       - run:
           working_directory: <<parameters.cwd>>
-          command: docker-compose <<parameters.compose_args>> run --rm <<parameters.service_name>> <<parameters.args>>
+          command: docker compose <<parameters.compose_args>> run --rm <<parameters.service_name>> <<parameters.args>>
           environment:
-            # Workaround for docker-compose being unable to pull image from gcr
+            # Workaround for Docker Compose being unable to pull image from gcr
             # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/issues/193#issuecomment-586288752
             LD_LIBRARY_PATH: /usr/local/lib
       - run:
           working_directory: <<parameters.cwd>>
-          command: docker-compose <<parameters.compose_args>> logs -t | sort -k 3
+          command: docker compose <<parameters.compose_args>> logs -t | sort -k 3
           when: on_fail
 
 orbs:
