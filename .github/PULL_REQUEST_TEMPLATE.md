@@ -17,3 +17,4 @@ Feel free to add anything extra to the list if need be!
 - [ ] I've included any special rollback strategies above
 - [ ] Any relevant metrics/monitors/SLOs have been added or modified
 - [ ] I've notified all relevant stakeholders of the change
+- [ ] I've updated .github/CODEOWNERS, if relevant
