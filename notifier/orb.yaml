@@ -203,11 +203,6 @@ jobs:
       Uses slack orb to send a notification to slack when a deployment fails.
     executor: alpine-stable
     parameters:
-      changes:
-        default: ''
-        description: |
-          The (optional) changelog for this release.
-        type: string
       channel:
         default: ${SLACK_DEFAULT_CHANNEL}
         description: |
