@@ -10,6 +10,48 @@ executors:
     - image: alpine:latest
     resource_class: small
 
+commands:
+  slack-on-failure:
+    description: |
+      Uses slack orb to send a notification to slack when a deployment fails.
+    executor: alpine-stable
+    parameters:
+      channel:
+        default: ${SLACK_DEFAULT_CHANNEL}
+        description: |
+          Destination channel for your slack messages.
+        type: string
+    steps:
+      - slack/notify:
+          channel: <<parameters.channel>>
+          custom: |
+            {
+              "text": "",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":alert: *Failure* :alert: \n - Job name: `${CIRCLE_JOB}` \n - Repository name: `${CIRCLE_PROJECT_REPONAME}` \n - Branch `${CIRCLE_BRANCH}` \n - Blame :point_right: `@${CIRCLE_USERNAME}` \n - Build number: #${CIRCLE_BUILD_NUM}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
 jobs:
   datadog:
     description: |
@@ -197,44 +239,3 @@ jobs:
             -u "<<parameters.user>>" \
             -v "<<parameters.version>>" \
             -w "<<parameters.webhook>>"
-
-  slack-on-failure:
-    description: |
-      Uses slack orb to send a notification to slack when a deployment fails.
-    executor: alpine-stable
-    parameters:
-      channel:
-        default: ${SLACK_DEFAULT_CHANNEL}
-        description: |
-          Destination channel for your slack messages.
-        type: string
-    steps:
-      - slack/notify:
-          channel: <<parameters.channel>>
-          custom: |
-            {
-              "text": "",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":alert: *Failure* :alert: \n - Job name: `${CIRCLE_JOB}` \n - Repository name: `${CIRCLE_PROJECT_REPONAME}` \n - Branch `${CIRCLE_BRANCH}` \n - Blame :point_right: `@${CIRCLE_USERNAME}` \n - Build number: #${CIRCLE_BUILD_NUM}"
-                  }
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "View Job"
-                      },
-                      "url": "${CIRCLE_BUILD_URL}"
-                    }
-                  ]
-                }
-              ]
-            }
-          event: fail
