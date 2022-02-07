@@ -2,7 +2,7 @@ version: 2.1
 description: "Tools for notifying external services about CI events"
 
 orbs:
-  slack: circleci/slack@4.7.0
+  slack: circleci/slack@4
 
 executors:
   alpine-stable:
@@ -10,10 +10,13 @@ executors:
     - image: alpine:latest
     resource_class: small
 
+# This command has two conditions:
+# - Since it could be too noisy, it MUST be used only on production deploys!
+# - It MUST be used as a post-step from a job
 commands:
-  slack-on-deploy:
+  slack-on-fail:
     description: |
-      Uses slack orb to send a notification to slack when a deployment fails.
+      Uses slack orb to send messages to slack when a job fails. Note that if a job uses parallelism or matrix, it will send as many messages as jobs executed.
     parameters:
       channel:
         default: ${SLACK_DEFAULT_CHANNEL}
@@ -29,10 +32,28 @@ commands:
               "blocks": [
                 {
                   "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Failure* :x: \n - Job name: `${CIRCLE_JOB}` \n - Repository name: `${CIRCLE_PROJECT_REPONAME}` \n - Branch `${CIRCLE_BRANCH}` \n - Blame :point_right: @${CIRCLE_USERNAME} \n - Build number: #${CIRCLE_BUILD_NUM}"
-                  }
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Failure* :x:"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "Job name: `${CIRCLE_JOB}`"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "Repository name: `${CIRCLE_PROJECT_REPONAME}`"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "Branch `${CIRCLE_BRANCH}`"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "Blame :point_right: @${CIRCLE_USERNAME}"
+                    }
+                  ],
                 },
                 {
                   "type": "actions",
