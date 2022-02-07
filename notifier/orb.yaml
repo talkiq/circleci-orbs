@@ -11,7 +11,7 @@ executors:
     resource_class: small
 
 commands:
-  slack-on-failure:
+  slack-on-deploy:
     description: |
       Uses slack orb to send a notification to slack when a deployment fails.
     parameters:
@@ -31,7 +31,7 @@ commands:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":alert: *Failure* :alert: \n - Job name: `${CIRCLE_JOB}` \n - Repository name: `${CIRCLE_PROJECT_REPONAME}` \n - Branch `${CIRCLE_BRANCH}` \n - Blame :point_right: `@${CIRCLE_USERNAME}` \n - Build number: #${CIRCLE_BUILD_NUM}"
+                    "text": "*Failure* :x: \n - Job name: `${CIRCLE_JOB}` \n - Repository name: `${CIRCLE_PROJECT_REPONAME}` \n - Branch `${CIRCLE_BRANCH}` \n - Blame :point_right: @${CIRCLE_USERNAME} \n - Build number: #${CIRCLE_BUILD_NUM}"
                   }
                 },
                 {
