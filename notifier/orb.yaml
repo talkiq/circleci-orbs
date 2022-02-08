@@ -36,7 +36,7 @@ commands:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": "Job Failed. :x:",
+                    "text": "Job Failed :x:",
                     "emoji": true
                   }
                 },
