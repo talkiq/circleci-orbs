@@ -33,12 +33,16 @@ commands:
               "text": "",
               "blocks": [
                 {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "Job Failed. :x:",
+                    "emoji": true
+                  }
+                },
+                {
                   "type": "section",
                   "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Failure* :x:"
-                    },
                     {
                       "type": "mrkdwn",
                       "text": "Job name: `${CIRCLE_JOB}`"
