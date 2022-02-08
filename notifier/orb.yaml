@@ -15,8 +15,10 @@ executors:
 # - It MUST be used as a post-step from a job
 commands:
   slack-on-fail:
-    description: |
-      Uses slack orb to send messages to slack when a job fails. Note that if a job uses parallelism or matrix, it will send as many messages as jobs executed.
+    description: >
+      Uses slack orb to send messages to slack when a job fails.
+      Note that if a job uses parallelism or matrix, it will send as many
+      messages as jobs executed.
     parameters:
       channel:
         default: ${SLACK_DEFAULT_CHANNEL}
@@ -53,7 +55,7 @@ commands:
                       "type": "mrkdwn",
                       "text": "Blame :point_right: @${CIRCLE_USERNAME}"
                     }
-                  ],
+                  ]
                 },
                 {
                   "type": "actions",
