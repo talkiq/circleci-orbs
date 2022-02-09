@@ -207,7 +207,7 @@ jobs:
                 }' \
             "https://sentry.io/api/0/organizations/<<parameters.organization>>/releases/"
 
-  slack:
+  slack-on-deploy:
     description: |
       Uses thekevjames/slack-notifier to send a deployment notification to your workspace.
     executor: alpine-stable
