@@ -1,11 +1,82 @@
 version: 2.1
 description: "Tools for notifying external services about CI events"
 
+orbs:
+  slack: circleci/slack@4
+
 executors:
   alpine-stable:
     docker:
     - image: alpine:latest
     resource_class: small
+
+# This command has two conditions:
+# - Since it could be too noisy, it MUST be used only on production deploys!
+# - It MUST be used as a post-step from a job
+commands:
+  slack-on-fail:
+    description: >
+      Uses slack orb to send messages to slack when a job fails.
+      Note that if a job uses parallelism or matrix, it will send as many
+      messages as jobs executed.
+    parameters:
+      channel:
+        default: ${SLACK_DEFAULT_CHANNEL}
+        description: |
+          Destination channel for your slack messages.
+        type: string
+    steps:
+      - slack/notify:
+          channel: <<parameters.channel>>
+          custom: |
+            {
+              "text": "",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "Job Failed :x:",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "Job name: `${CIRCLE_JOB}`"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "Repository name: `${CIRCLE_PROJECT_REPONAME}`"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "Branch `${CIRCLE_BRANCH}`"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "Blame :point_right: @${CIRCLE_USERNAME}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
 
 jobs:
   datadog:
@@ -136,7 +207,7 @@ jobs:
                 }' \
             "https://sentry.io/api/0/organizations/<<parameters.organization>>/releases/"
 
-  slack:
+  slack-on-deploy:
     description: |
       Uses thekevjames/slack-notifier to send a deployment notification to your workspace.
     executor: alpine-stable
