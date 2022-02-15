@@ -93,6 +93,12 @@ jobs:
           Username to be used for authenticating against the specified
           repository.
         type: string
+      build:
+        description: >
+          If false, skip the 'poetry build' step. Useful for
+          workflows with complicated build processes.
+        type: boolean
+        default: true
     steps:
       - run: python3 -m pip install poetry
       - checkout
@@ -107,6 +113,8 @@ jobs:
       - run:
           command: poetry build
           working_directory: <<parameters.cwd>>
+          when:
+            condition: <<parameters.build>>
       - when:
           condition: << parameters.repository_url >>
           steps:
