@@ -110,11 +110,12 @@ jobs:
                 exit 1;
             fi
           working_directory: <<parameters.cwd>>
-      - run:
-          command: poetry build
-          working_directory: <<parameters.cwd>>
-          when:
-            condition: <<parameters.build>>
+      - when:
+          condition: <<parameters.build>>
+          steps:
+            - run:
+                command: poetry build
+                working_directory: <<parameters.cwd>>
       - when:
           condition: << parameters.repository_url >>
           steps:
