@@ -26,6 +26,18 @@ commands:
           Destination channel for your slack messages.
         type: string
     steps:
+      - run:
+          name: install curl
+          command: |
+            if which apk >/dev/null; then
+              apk add --no-cache --no-progress curl curl-dev
+            elif which apt-get >/dev/null; then
+              apt-get update -qy
+              apt-get install -qy curl
+            else
+              echo >&2 "ERROR: could not find supported package manager"
+              exit 1
+            fi
       - slack/notify:
           channel: <<parameters.channel>>
           custom: |
