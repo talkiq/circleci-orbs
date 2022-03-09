@@ -97,12 +97,21 @@ commands:
     description: >
       Install the Google Cloud SDK on a supported executor. Currently supported
       package managers: apk, apt-get.
+    parameters:
+      version:
+        # N.B. version 376.0.0 (currently latest) is broken on musl systems, as
+        # it contains a glibc shared object.
+        default: '375.0.0'
+        description: >
+          Version of gcloud to install. Set to "latest" or a specified version
+          such as "375.0.0".
+        type: string
     steps:
       - run:
           name: install dependencies
           command: |
             if which apk >/dev/null; then
-              apk add --no-cache --no-progress bash curl curl-dev python3
+              apk add --no-cache --no-progress bash curl python3
             elif which apt-get >/dev/null; then
               apt-get update -qy
               apt-get install -qy bash curl python
@@ -110,10 +119,33 @@ commands:
               echo >&2 "ERROR: could not find supported package manager"
               exit 1
             fi
-      - run: |
-          if [ ! -d /root/google-cloud-sdk ]; then
-            curl -sSL https://sdk.cloud.google.com | bash -s -- --disable-prompts
-          fi
+      - when:
+          condition:
+            equal: [ <<parameters.version>>, "latest" ]
+          steps:
+            - run: |
+                if [ ! -d /root/google-cloud-sdk ]; then
+                  curl -sSL https://sdk.cloud.google.com | bash -s -- --disable-prompts
+                fi
+      - when:
+          condition:
+            not:
+              equal: [ <<parameters.version>>, "latest" ]
+          steps:
+            # This is basically the same as running:
+            #   curl -sSL https://sdk.cloud.google.com | bash -s -- --disable-prompts
+            # The only difference here is in the sed commands:
+            # * remove some unnecessary >10k line verbose logging, and
+            # * download a specified version of gcloud
+            - run: |
+                if [ ! -d /root/google-cloud-sdk ]; then
+                  scratch="$(mktemp -d -t tmp.XXXXXXXXXX)"
+                  curl -sSLo "${scratch}/install.sh" https://dl.google.com/dl/cloudsdk/channels/rapid/install_google_cloud_sdk.bash
+                  sed -i 's/-zxvf/-zxf/' "${scratch}/install.sh"
+                  sed -i 's#^__SDK_URL_DIR=\(.*\)$#__SDK_URL_DIR=\1/downloads#' "${scratch}/install.sh"
+                  sed -i 's/^__SDK_TGZ.*$/__SDK_TGZ="google-cloud-sdk-<<parameters.version>>-linux-x86_64.tar.gz"/' "${scratch}/install.sh"
+                  bash "${scratch}/install.sh" --disable-prompts
+                fi
       - run: |
           if [ ! -f /usr/bin/gcloud ]; then
             ln -s /root/google-cloud-sdk/bin/gcloud /usr/bin/gcloud
