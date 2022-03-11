@@ -61,7 +61,7 @@ jobs:
           Optional alternate config file.
         type: string
       python_version:
-        default: 3.7.8
+        default: latest
         description: |
           The python version used to run pre-commit.
         type: string
