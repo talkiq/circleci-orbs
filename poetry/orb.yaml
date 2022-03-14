@@ -6,6 +6,18 @@ commands:
     description: >
       Install poetry. Requires a pre-existing Python 3.x installation.
       Currently supported package managers: apk, apt-get.
+    parameters:
+      allow_preview:
+        default: false
+        description: >
+          Allow prerelease versions of Poetry to be installed.
+        type: boolean
+      version:
+        default: latest
+        description: >
+          Specify the version of poetry to install. Must be either an "x.y.z"
+          version or "latest".
+        type: string
     steps:
       - run:
           name: install curl
@@ -19,6 +31,15 @@ commands:
               echo >&2 "ERROR: could not find supported package manager"
               exit 1
             fi
+      - unless:
+          condition:
+            equal: [ <<parameters.version>>, "latest" ]
+          steps:
+            - run: echo "export POETRY_VERSION=<<parameters.version>>" >> ${BASH_ENV}
+      - when:
+          condition: <<parameters.allow_preview>>
+          steps:
+            - run: echo "export POETRY_PREVIEW=1" >> ${BASH_ENV}
       - run: curl -sSL https://install.python-poetry.org | python3
       - run: echo 'export PATH="/root/.local/bin:${PATH}"' >> ${BASH_ENV}
 
