@@ -1,6 +1,48 @@
 version: 2.1
 description: "Tools for running poetry commands."
 
+commands:
+  install:
+    description: >
+      Install poetry. Requires a pre-existing Python 3.x installation.
+      Currently supported package managers: apk, apt-get.
+    parameters:
+      allow_preview:
+        default: false
+        description: >
+          Allow prerelease versions of Poetry to be installed.
+        type: boolean
+      version:
+        default: latest
+        description: >
+          Specify the version of poetry to install. Must be either an "x.y.z"
+          version or "latest".
+        type: string
+    steps:
+      - run:
+          name: install curl
+          command: |
+            if which apk >/dev/null; then
+              apk add --no-cache --no-progress curl
+            elif which apt-get >/dev/null; then
+              apt-get update -qy
+              apt-get install -qy curl
+            else
+              echo >&2 "ERROR: could not find supported package manager"
+              exit 1
+            fi
+      - unless:
+          condition:
+            equal: [ <<parameters.version>>, "latest" ]
+          steps:
+            - run: echo "export POETRY_VERSION=<<parameters.version>>" >> ${BASH_ENV}
+      - when:
+          condition: <<parameters.allow_preview>>
+          steps:
+            - run: echo "export POETRY_PREVIEW=1" >> ${BASH_ENV}
+      - run: curl -sSL https://install.python-poetry.org | python3
+      - run: echo 'export PATH="/root/.local/bin:${PATH}"' >> ${BASH_ENV}
+
 jobs:
   run:
     description: >
@@ -39,7 +81,7 @@ jobs:
         default: small
         type: string
     steps:
-      - run: python3 -m pip install poetry
+      - install
       - steps: <<parameters.configure_poetry>>
       - checkout
       - run:
@@ -100,7 +142,7 @@ jobs:
         type: boolean
         default: true
     steps:
-      - run: python3 -m pip install poetry
+      - install
       - checkout
       - run:
           name: validate tag matches pyproject.toml
