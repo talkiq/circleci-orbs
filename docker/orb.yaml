@@ -354,12 +354,17 @@ commands:
         description: >
           Container registry to-be-used.
         type: string
+      tag:
+        default: ${CIRCLE_TAG}
+        description: >
+          Name of the target tag to be used.
+        type: string
     steps:
       - run:
           name: docker push (tag)
           command: |
-            if [[ -n "${CIRCLE_TAG}" ]]; then
-              docker push "<<parameters.registry>>/<<parameters.image>>:${CIRCLE_TAG}"
+            if [[ -n "<<parameters.tag>>" ]]; then
+              docker push "<<parameters.registry>>/<<parameters.image>>:<<parameters.tag>>"
             fi
 
 jobs:
