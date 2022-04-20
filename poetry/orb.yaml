@@ -91,7 +91,7 @@ jobs:
           command: poetry run <<parameters.cmd>>
           working_directory: <<parameters.cwd>>
 
-  run_with_extra:
+  run-with-extra:
     description: >
       Run an arbitrary command within your poetry
       environment with extras (-E flag)
