@@ -44,7 +44,7 @@ commands:
       - run: echo 'export PATH="/root/.local/bin:${PATH}"' >> ${BASH_ENV}
 
 jobs:
-  run:
+  run: &run
     description: >
       Run an arbitrary command within your poetry environment.
     docker:
@@ -90,6 +90,25 @@ jobs:
       - run:
           command: poetry run <<parameters.cmd>>
           working_directory: <<parameters.cwd>>
+
+  run_with_extra:
+    <<: *run
+    description: >
+      Run an arbitrary command within your poetry
+      environment with extras (-E flag)
+    parameters:
+      extra:
+        type: string
+    steps:
+      - install
+      - steps: <<parameters.configure_poetry>>
+      - run:
+          command: poetry install -n --no-ansi -E <<parameters.extra>>
+          working_directory: <<parameters.cwd>>
+      - run:
+          command: poetry run <<parameters.cmd>>
+          working_directory: <<parameters.cwd>>
+
 
   publish:
     description: >
