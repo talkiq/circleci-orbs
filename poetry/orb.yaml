@@ -107,7 +107,7 @@ jobs:
       - steps: <<parameters.configure_poetry>>
       - checkout
       - run:
-          command: poetry install -n --no-ansi -E <<parameters.extra>>
+          command: poetry install -n --no-ansi -E "<<parameters.extra>>"
           working_directory: <<parameters.cwd>>
       - run:
           command: poetry run <<parameters.cmd>>
