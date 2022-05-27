@@ -1,6 +1,12 @@
 version: 2.1
 description: "Tools for running poetry commands."
 
+executors:
+  python-latest:
+    docker:
+      - image: python:latest
+    resource_class: small
+
 commands:
   install:
     description: >
@@ -47,9 +53,7 @@ jobs:
   run:
     description: >
       Run an arbitrary command within your poetry environment.
-    docker:
-      - image: python:<<parameters.python_version>>
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
       cmd:
         type: string
@@ -74,12 +78,14 @@ jobs:
           Working directory for your package. Should point to a folder
           containing your pyproject.toml file.
         type: string
-      python_version:
-        default: latest
-        type: string
-      resource_class:
-        default: small
-        type: string
+      executor:
+        default: python-latest
+        description: >
+          Executor for the job. Must have a working Python version installed.
+          To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small python:latest docker image.
+        type: executor
     steps:
       - install
       - steps: <<parameters.configure_poetry>>
@@ -94,22 +100,28 @@ jobs:
   publish:
     description: >
       Publishes your package to the specified repository.
-    docker:
-      - image: python:<<parameters.python_version>>
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
+      build:
+        description: >
+          If false, skip the 'poetry build' step. Useful for
+          workflows with complicated build processes.
+        type: boolean
+        default: true
       cwd:
         default: '.'
         description: >
           Working directory for your package. Should point to a folder
           containing your pyproject.toml file.
         type: string
-      python_version:
-        default: latest
-        type: string
-      resource_class:
-        default: small
-        type: string
+      executor:
+        default: python-latest
+        description: >
+          Executor for the job. Must have a working Python version installed.
+          To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small python:latest docker image.
+        type: executor
       password:
         description: >
           Password to be used for authenticating against the specified
@@ -135,12 +147,6 @@ jobs:
           Username to be used for authenticating against the specified
           repository.
         type: string
-      build:
-        description: >
-          If false, skip the 'poetry build' step. Useful for
-          workflows with complicated build processes.
-        type: boolean
-        default: true
     steps:
       - install
       - checkout
