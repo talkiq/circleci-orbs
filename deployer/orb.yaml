@@ -1,33 +1,37 @@
 version: 2.1
 description: "Tools for running deployment commands"
 
+executors:
+  python-latest:
+    docker:
+      - image: python:latest
+    resource_class: small
+
 jobs:
   gemfury:
     description: >
       Deploy a package to Gemfury (ie. for internal usage only). Use PyPI for
       OSS projects!
-    docker:
-      - image: python:<<parameters.python_version>>
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
       folder:
         default: '.'
         description: >
           Path to the folder containing the Python package.
         type: string
+      executor:
+        default: python-latest
+        description: >
+          Executor for the job. Must have a working Python version installed.
+          To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small python:latest docker image.
+        type: executor
       gemfury_token:
         default: GEMFURY_TOKEN
         description: >
           Name of the env var containing the Gemfury token.
         type: env_var_name
-      python_version:
-        description: >
-          Python version to use to build and deploy the package. Used as the
-          docker executor, so you can use any sort of tag (eg. ``3.7.4-slim``).
-        type: string
-      resource_class:
-        default: small
-        type: string
       verify_version:
         default: ${CIRCLE_TAG}
         description: >
