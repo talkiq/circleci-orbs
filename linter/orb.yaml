@@ -41,11 +41,7 @@ commands:
           key: cache-pre-commit-<<parameters.cache_prefix>>-{{ checksum "<<parameters.config_file>>" }}
           paths:
             - ~/.cache/pre-commit
-      - run: pre-commit run --all-files -c <<parameters.config_file>>
-      - run:
-          name: git diff
-          command: git --no-pager diff
-          when: on_fail
+      - run: pre-commit run --all-files --show-diff-on-failure -c <<parameters.config_file>>
 
 jobs:
   pre-commit:
