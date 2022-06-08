@@ -48,18 +48,17 @@ commands:
           If enabled, turns on CircleCI's docker_layer_caching which makes
           builds faster by skipping steps that have not changed.
         type: boolean
+      version:
+        default: 20.10.6
+        description: >
+          The docker server version to be provisioned. See the docs for
+          available versions:
+          https://circleci.com/docs/2.0/building-docker-images/#docker-version
+        type: string
     steps:
-      - when:
-          condition: <<parameters.docker_layer_caching>>
-          steps:
-            - setup_remote_docker:
-                version: 20.10.6
-                docker_layer_caching: true
-      - unless:
-          condition: <<parameters.docker_layer_caching>>
-          steps:
-            - setup_remote_docker:
-                version: 20.10.6
+      - setup_remote_docker:
+          version: <<parameters.version>>
+          docker_layer_caching: <<parameters.docker_layer_caching>>
       - run: gcloud auth configure-docker --quiet
 
   configure-gke:
