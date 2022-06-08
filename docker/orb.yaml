@@ -1,6 +1,12 @@
 version: 2.1
 description: "Tools for running docker commands."
 
+executors:
+  docker-latest:
+    docker:
+      - image: docker:git
+    resource_class: medium
+
 commands:
   build:
     description: >
@@ -373,9 +379,7 @@ jobs:
       Build, tag, and push a docker image. It will be tagged with all relevant
       metadata, eg. commit hash, branch (if this is a branch build), tag (if
       this is a tag build), and "latest".
-    docker:
-      - image: <<parameters.executor>>
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
       build_args:
         default: ''
@@ -388,10 +392,13 @@ jobs:
           Name of dockerfile to use.
         type: string
       executor:
-        default: docker:20.10.6-git
+        default: docker-latest
         description: >
-          Name of the docker image to use to execute the job.
-        type: string
+          Executor for the job. Must support docker-in-docker and have a
+          working git command installed. To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a medium docker:git docker image.
+        type: executor
       image:
         default: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
         description: >
@@ -409,9 +416,6 @@ jobs:
         default: 'docker.io'
         description: >
           Container registry to-be-used.
-        type: string
-      resource_class:
-        default: medium
         type: string
       workspace:
         default: ''
