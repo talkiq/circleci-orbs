@@ -1,15 +1,19 @@
 version: 2.1
 description: "Tools for running documentation commands"
 
+executors:
+  python-latest:
+    docker:
+      - image: python:latest
+    resource_class: small
+
 jobs:
   compile-and-upload:
     description: >
       Compiles Sphinxdocs for a repository, then deploy it to Google Storage
       (ie. for internal use only). Optional hooks are provided for building
       APIdocs, etc.
-    docker:
-      - image: <<parameters.executor>>
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
       creds:
         default: GCLOUD_SERVICE_KEY
@@ -18,11 +22,13 @@ jobs:
           for the GCP project.
         type: env_var_name
       executor:
-        default: python:latest
+        default: python-latest
         description: >
-          Name of the docker image to use to execute the job. Must have python3
-          installed.
-        type: string
+          Executor for the job. Must have a working Python version installed.
+          To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small python:latest docker image.
+        type: executor
       folder:
         default: '.'
         description: >
@@ -77,9 +83,6 @@ jobs:
         default: ${CIRCLE_PROJECT_REPONAME}
         description: |
           The name of the project folder in GCS.
-        type: string
-      resource_class:
-        default: small
         type: string
     steps:
       - run: python3 -m pip install sphinx
