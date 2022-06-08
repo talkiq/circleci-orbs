@@ -1,6 +1,12 @@
 version: 2.1
 description: "Tools for running lint commands"
 
+executors:
+  python-latest:
+    docker:
+      - image: python:latest
+    resource_class: small
+
 commands:
   pre-commit:
     description: |
@@ -8,17 +14,18 @@ commands:
     parameters:
       cache_prefix:
         default: ''
-        description: |
-          Optional cache prefix to be used on CircleCI. Can be used for cache busting or to ensure multiple jobs use different caches.
+        description: >
+          Optional cache prefix to be used on CircleCI. Can be used for cache
+          busting or to ensure multiple jobs use different caches.
         type: string
       config_file:
         default: '.pre-commit-config.yaml'
-        description: |
+        description: >
           Optional alternate config file.
         type: string
       version:
         default: latest
-        description: |
+        description: >
           Pre-commit package version.
         type: string
     steps:
@@ -47,30 +54,27 @@ jobs:
   pre-commit:
     description: |
       Runs pre-commit hooks against the current repo.
-    docker:
-      - image: python:<<parameters.python_version>>
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
       config_file:
         default: '.pre-commit-config.yaml'
-        description: |
+        description: >
           Optional alternate config file.
         type: string
-      python_version:
-        default: latest
-        description: |
-          The python version used to run pre-commit.
-        type: string
+      executor:
+        default: python-latest
+        description: >
+          Executor for the job. Must have a working Python version installed.
+          To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small python:latest docker image.
+        type: executor
       pre_commit_version:
         default: latest
-        description: |
+        description: >
           Pre-commit package version.
-        type: string
-      resource_class:
-        default: small
         type: string
     steps:
       - pre-commit:
-          cache_prefix: <<parameters.python_version>>
           config_file: <<parameters.config_file>>
           version: <<parameters.pre_commit_version>>
