@@ -1,6 +1,16 @@
 version: 2.1
 description: "Tools for running gcloud commands."
 
+executors:
+  docker-latest:
+    docker:
+      - image: docker:git
+    resource_class: medium
+  gcloud-alpine-latest:
+    docker:
+      - image: google/cloud-sdk:alpine
+    resource_class: small
+
 commands:
   auth:
     description: >
@@ -253,9 +263,7 @@ jobs:
   deploy-cloud-function:
     description: >
       Deploy a package to Google's Cloud Function service.
-    docker:
-      - image: google/cloud-sdk:alpine
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
       creds:
         default: GCLOUD_SERVICE_KEY
@@ -263,9 +271,23 @@ jobs:
           Name of environment variable storing the base64-encoded service key
           for the GCP project.
         type: env_var_name
+      executor:
+        default: gcloud-alpine-latest
+        description: >
+          Executor for the job. Must be alpine-based and have a working gcloud
+          version installed. To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small google/cloud-sdk:alpine docker image.
+        type: executor
       funcname:
         description: >
           Name of the cloud function being deployed.
+        type: string
+      memory:
+        default: ''
+        description: >
+          Limit on the amount of memory the function can use. Allowed values
+          are: 128MB, 256MB, 512MB, 1024MB, and 2048MB.
         type: string
       packagename:
         description: >
@@ -274,14 +296,6 @@ jobs:
       project:
         description: >
           Name of GCP project to which we will push.
-        type: string
-      resource_class:
-        default: small
-        type: string
-      memory:
-        default: ''
-        description: >
-          Limit on the amount of memory the function can use. Allowed values are: 128MB, 256MB, 512MB, 1024MB, and 2048MB.
         type: string
     steps:
       - run: apk add --no-cache --no-progress py3-pip zip
@@ -322,9 +336,7 @@ jobs:
     description: >
       Deploy a container to either Google's managed Cloud Run service or to a
       specified Knative cluster.
-    docker:
-      - image: google/cloud-sdk:alpine
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
       creds:
         default: GCLOUD_SERVICE_KEY
@@ -354,6 +366,14 @@ jobs:
         description: >
           Evironment variables to be passed into the cloud run container.
         type: string
+      executor:
+        default: gcloud-alpine-latest
+        description: >
+          Executor for the job. Must have a working gcloud version installed.
+          To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small google/cloud-sdk:alpine docker image.
+        type: executor
       image:
         default: ${CIRCLE_PROJECT_REPONAME}
         description: >
@@ -380,9 +400,6 @@ jobs:
       region:
         description: >
           Name of GCP region to which we will push.
-        type: string
-      resource_class:
-        default: small
         type: string
     steps:
       - auth:
@@ -433,8 +450,7 @@ jobs:
     description: >
       Deploy a k8s deployment to GKE via provided YAML. Will record the
       previous deployment version in a workspace.
-    docker:
-      - image: google/cloud-sdk:alpine
+    executor: <<parameters.executor>>
     parameters:
       cluster:
         type: string
@@ -445,6 +461,14 @@ jobs:
           Name of your deployment. If you are using multi-deployment
           autoscaling this may correspond to multiple actual k8s deployments.
         type: string
+      executor:
+        default: gcloud-alpine-latest
+        description: >
+          Executor for the job. Must have a working gcloud version installed.
+          To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small google/cloud-sdk:alpine docker image.
+        type: executor
       k8s_yaml:
         description: >
           The k8s YAML file for your deployment(s).
@@ -518,20 +542,12 @@ jobs:
       This job will build, tag, and push a docker image. It will be tagged with
       all relevant metadata, eg. commit hash, branch (if this is a branch
       build), tag (if this is a tag build), and "latest".
-    docker:
-      - image: <<parameters.executor>>
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
       build_args:
         default: ''
         description: >
           Extra flags to pass to docker build.
-        type: string
-      git_repository_url:
-        default: ''
-        description: >
-          If unset, uses the current repository. Otherwise, clones the provided
-          repo's default branch to a depth of 1.
         type: string
       creds:
         default: GCLOUD_SERVICE_KEY
@@ -551,9 +567,18 @@ jobs:
           Name of dockerfile to use.
         type: string
       executor:
-        default: docker:20.10.6-git
+        default: docker-latest
         description: >
-          Name of the docker image to use to execute the job.
+          Executor for the job. Must support docker-in-docker and have a
+          working git command installed. To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a medium docker:git docker image.
+        type: executor
+      git_repository_url:
+        default: ''
+        description: >
+          If unset, uses the current repository. Otherwise, clones the provided
+          repo's default branch to a depth of 1.
         type: string
       image:
         default: ${CIRCLE_PROJECT_REPONAME}
@@ -576,9 +601,6 @@ jobs:
         default: 'gcr.io'
         description: >
           Container registry to-be-used.
-        type: string
-      resource_class:
-        default: medium
         type: string
       workspace:
         default: ''
