@@ -7,7 +7,7 @@ orbs:
 executors:
   alpine-stable:
     docker:
-    - image: alpine:latest
+      - image: alpine:latest
     resource_class: small
 
 # This command has two conditions:
@@ -94,7 +94,7 @@ jobs:
   datadog:
     description: |
       Creates a datadog event.
-    executor: alpine-stable
+    executor: <<parameters.executor>>
     parameters:
       api_key:
         default: DATADOG_API_KEY
@@ -106,6 +106,14 @@ jobs:
         description: |
           Domain name of the Datadog ingestion API.
         type: string
+      executor:
+        default: alpine-latest
+        description: >
+          Executor for the job. Must be alpine-based. To use your own custom
+          executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small alpine:latest docker image.
+        type: executor
       tag:
         default: ""
         description: |
@@ -130,13 +138,21 @@ jobs:
   sentry-deployment:
     description: |
       Creates a new release deployment in Sentry. Should be run after the release has been created.
-    executor: alpine-stable
+    executor: <<parameters.executor>>
     parameters:
       environment:
         default: ${CIRCLE_TAG}
         description: |
           The environment for which the release applies.
         type: string
+      executor:
+        default: alpine-latest
+        description: >
+          Executor for the job. Must be alpine-based. To use your own custom
+          executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small alpine:latest docker image.
+        type: executor
       organization:
         default: ${CIRCLE_PROJECT_USERNAME}
         description: |
@@ -164,13 +180,21 @@ jobs:
   sentry-release:
     description: |
       Creates a new release in Sentry.
-    executor: alpine-stable
+    executor: <<parameters.executor>>
     parameters:
       commit:
         default: ${CIRCLE_SHA1}
         description: |
           The git commit SHA for the new release.
         type: string
+      executor:
+        default: alpine-latest
+        description: >
+          Executor for the job. Must be alpine-based. To use your own custom
+          executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small alpine:latest docker image.
+        type: executor
       prev_commit:
         default: ''
         description: |
@@ -222,7 +246,7 @@ jobs:
   slack-on-deploy:
     description: |
       Uses thekevjames/slack-notifier to send a deployment notification to your workspace.
-    executor: alpine-stable
+    executor: <<parameters.executor>>
     parameters:
       changes:
         default: ''
@@ -239,6 +263,14 @@ jobs:
         description: |
           The environment being deployed.
         type: string
+      executor:
+        default: alpine-latest
+        description: >
+          Executor for the job. Must be alpine-based. To use your own custom
+          executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small alpine:latest docker image.
+        type: executor
       prev_version:
         default: unknown
         description: |
