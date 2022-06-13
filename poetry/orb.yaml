@@ -101,9 +101,7 @@ jobs:
     description: >
       Run an arbitrary command within your poetry
       environment with extras (-E flag)
-    docker:
-      - image: python:<<parameters.python_version>>
-    resource_class: <<parameters.resource_class>>
+    executor: <<parameters.executor>>
     parameters:
       <<: *run-parameters
       extra:
