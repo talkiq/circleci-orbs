@@ -54,7 +54,7 @@ jobs:
     description: >
       Run an arbitrary command within your poetry environment.
     executor: <<parameters.executor>>
-    parameters: &run-parameters
+    parameters:
       cmd:
         type: string
       configure_poetry:
