@@ -99,7 +99,7 @@ jobs:
           condition: <<parameters.extra>>
           steps:
             - run:
-                command: poetry install -n --no-ansi -E "<<parameters.extra>> "
+                command: poetry install -n --no-ansi -E "<<parameters.extra>>"
                 working_directory: <<parameters.cwd>>
       - unless:
           condition: <<parameters.extra>>
