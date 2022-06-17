@@ -250,7 +250,7 @@ jobs:
           The name of the project.
         type: string
       user:
-        default: ${CIRCLE_USERNAME}
+        default: "@${CIRCLE_USERNAME}"
         description: |
           User responsible for this release.
         type: string
