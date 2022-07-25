@@ -9,8 +9,6 @@ implementation-specific to be worthwhile outside of the company.
 Usage
 -----
 
-|deployer| |docker| |docs| |gcloud| |linter| |notifier| |poetry| |tester|
-
 Simply include the ``orb`` or ``orbs`` you're interested in within your
 ``.circleci/config.yml`` file:
 
@@ -29,6 +27,18 @@ Simply include the ``orb`` or ``orbs`` you're interested in within your
 
     # ... the rest of your config
 
+Latest Versions
+~~~~~~~~~~~~~~~
+
+* ``talkiq/deployer``: |deployer|
+* ``talkiq/docker``: |docker|
+* ``talkiq/docs``: |docs|
+* ``talkiq/gcloud``: |gcloud|
+* ``talkiq/linter``: |linter|
+* ``talkiq/notifier``: |notifier|
+* ``talkiq/poetry``: |poetry|
+* ``talkiq/tester``: |tester|
+
 Development
 -----------
 
@@ -40,35 +50,35 @@ pre-merge.
 
 Note that the ``$ORBNAME``, for example, ``"talkiq/linter"``.
 
-.. |deployer| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/deployer&style=flat-square&label=deployer
+.. |deployer| image:: https://badges.circleci.com/orbs/talkiq/deployer.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/deployer
 
-.. |docker| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/docker&style=flat-square&label=docker
+.. |docker| image:: https://badges.circleci.com/orbs/talkiq/docker.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/docker
 
-.. |docs| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/docs&style=flat-square&label=docs
+.. |docs| image:: https://badges.circleci.com/orbs/talkiq/docs.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/docs
 
-.. |gcloud| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/gcloud&style=flat-square&label=gcloud
+.. |gcloud| image:: https://badges.circleci.com/orbs/talkiq/gcloud.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/gcloud
 
-.. |linter| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/linter&style=flat-square&label=linter
+.. |linter| image:: https://badges.circleci.com/orbs/talkiq/linter.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/linter
 
-.. |notifier| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/notifier&style=flat-square&label=notifier
+.. |notifier| image:: https://badges.circleci.com/orbs/talkiq/notifier.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/notifier
 
-.. |poetry| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/poetry&style=flat-square&label=poetry
+.. |poetry| image:: https://badges.circleci.com/orbs/talkiq/poetry.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/poetry
 
-.. |tester| image:: https://img.shields.io/badge/endpoint.svg?url=https://badges.circleci.io/orb/talkiq/tester&style=flat-square&label=tester
+.. |tester| image:: https://badges.circleci.com/orbs/talkiq/tester.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/tester
 
