@@ -17,7 +17,7 @@ workflows:
           name: lint-orbs-<<matrix.lint-dir>>
           matrix:
             parameters:
-              lint-dir: [docker, gcloud, linter, notifier, poetry, tester]
+              lint-dir: [docker, gcloud, linter, notifier, poetry]
           filters:
             tags:
               only: /.*/
@@ -26,7 +26,7 @@ workflows:
           name: pack-orbs-talkiq/<<matrix.source-dir>>
           matrix:
             parameters:
-              source-dir: [docker, gcloud, linter, notifier, poetry, tester]
+              source-dir: [docker, gcloud, linter, notifier, poetry]
           filters:
             tags:
               only: /.*/
@@ -39,7 +39,7 @@ workflows:
           name: publish-dev-orbs-<<matrix.orb-name>>
           matrix:
             parameters:
-              orb-name: [talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry, talkiq/tester]
+              orb-name: [talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry]
           filters:
             tags:
               only: /.*/
@@ -51,7 +51,7 @@ workflows:
           name: dev-promote-prod-orbs-<<matrix.orb-name>>-<<matrix.release>>
           matrix:
             parameters:
-              orb-name: [talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry, talkiq/tester]
+              orb-name: [talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry]
               release: [patch, minor, major]
           filters:
             branches:
