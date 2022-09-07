@@ -4,11 +4,17 @@ orbs:
   orb-tools: circleci/orb-tools@7.3.0
   linter: talkiq/linter@volatile
 
+executors:
+  python:
+    docker:
+      - image: python:3.7.13
+    resource_class: small
+
 workflows:
   run-jobs:
     jobs:
       - linter/pre-commit:
-          python_version: 3.7.4
+          executor: python
           filters:
             tags:
               only: /.*/
