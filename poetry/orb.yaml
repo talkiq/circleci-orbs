@@ -55,8 +55,15 @@ jobs:
       Run an arbitrary command within your poetry environment.
     executor: <<parameters.executor>>
     parameters:
-      cmd:
-        type: string
+      commands:
+        description: >
+          The step (or steps) you want to run. For example:
+          ```
+          - run: poetry build
+          - run: poetry run pytest
+          ```
+        type: steps
+        default: []
       configure_poetry:
         description: >
           If there are any configurations that must occur prior to running
@@ -66,7 +73,7 @@ jobs:
 
           In other words, you may want to set this value to something like:
           ```
-          - run: python3 -m pip install keyring keyrings.google-artifactregistry-auth
+          - run: poetry self add keyrings.google-artifactregistry-auth
           - run: poetry config http-basic.repo-name username password
           - run: poetry config repositories.backup-repo url
           ```
@@ -86,30 +93,19 @@ jobs:
           `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
           Defaults to a small python:latest docker image.
         type: executor
-      extra:
-        description: >
-          Extra value to run with -E flag.
-        type: string
+      install_flags:
         default: ''
+        description: >
+          Extra flags to add to `poetry install` command.
+        type: string
     steps:
       - install
       - steps: <<parameters.configure_poetry>>
       - checkout
-      - when:
-          condition: <<parameters.extra>>
-          steps:
-            - run:
-                command: poetry install -n -E "<<parameters.extra>>"
-                working_directory: <<parameters.cwd>>
-      - unless:
-          condition: <<parameters.extra>>
-          steps:
-            - run:
-                command: poetry install -n
-                working_directory: <<parameters.cwd>>
       - run:
-          command: poetry run <<parameters.cmd>>
+          command: poetry install -n <<parameters.install_flags>>
           working_directory: <<parameters.cwd>>
+      - steps: <<parameters.commands>>
 
   publish:
     description: >
