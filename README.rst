@@ -18,7 +18,6 @@ Simply include the ``orb`` or ``orbs`` you're interested in within your
     orbs:
       deployer: talkiq/deployer@2
       docker: talkiq/docker@1
-      docs: talkiq/docs@0
       gcloud: talkiq/gcloud@1
       linter: talkiq/linter@1
       notifier: talkiq/notifier@1
@@ -32,7 +31,6 @@ Latest Versions
 
 * ``talkiq/deployer``: |deployer|
 * ``talkiq/docker``: |docker|
-* ``talkiq/docs``: |docs|
 * ``talkiq/gcloud``: |gcloud|
 * ``talkiq/linter``: |linter|
 * ``talkiq/notifier``: |notifier|
@@ -57,10 +55,6 @@ Note that the ``$ORBNAME``, for example, ``"talkiq/linter"``.
 .. |docker| image:: https://badges.circleci.com/orbs/talkiq/docker.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/docker
-
-.. |docs| image:: https://badges.circleci.com/orbs/talkiq/docs.svg
-    :alt: Latest Version
-    :target: https://circleci.com/orbs/registry/orb/talkiq/docs
 
 .. |gcloud| image:: https://badges.circleci.com/orbs/talkiq/gcloud.svg
     :alt: Latest Version
