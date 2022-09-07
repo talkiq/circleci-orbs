@@ -5,7 +5,7 @@ orbs:
   slack: circleci/slack@4
 
 executors:
-  alpine-stable:
+  alpine-latest:
     docker:
       - image: alpine:latest
     resource_class: small
