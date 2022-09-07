@@ -16,7 +16,6 @@ Simply include the ``orb`` or ``orbs`` you're interested in within your
 
     version: 2.1
     orbs:
-      deployer: talkiq/deployer@2
       docker: talkiq/docker@1
       gcloud: talkiq/gcloud@1
       linter: talkiq/linter@1
@@ -29,7 +28,6 @@ Simply include the ``orb`` or ``orbs`` you're interested in within your
 Latest Versions
 ~~~~~~~~~~~~~~~
 
-* ``talkiq/deployer``: |deployer|
 * ``talkiq/docker``: |docker|
 * ``talkiq/gcloud``: |gcloud|
 * ``talkiq/linter``: |linter|
@@ -47,10 +45,6 @@ branches will release `dev versions`_, which should be enough for testing
 pre-merge.
 
 Note that the ``$ORBNAME``, for example, ``"talkiq/linter"``.
-
-.. |deployer| image:: https://badges.circleci.com/orbs/talkiq/deployer.svg
-    :alt: Latest Version
-    :target: https://circleci.com/orbs/registry/orb/talkiq/deployer
 
 .. |docker| image:: https://badges.circleci.com/orbs/talkiq/docker.svg
     :alt: Latest Version
