@@ -21,7 +21,6 @@ Simply include the ``orb`` or ``orbs`` you're interested in within your
       linter: talkiq/linter@1
       notifier: talkiq/notifier@1
       poetry: talkiq/poetry@1
-      tester: talkiq/tester@1
 
     # ... the rest of your config
 
@@ -33,7 +32,6 @@ Latest Versions
 * ``talkiq/linter``: |linter|
 * ``talkiq/notifier``: |notifier|
 * ``talkiq/poetry``: |poetry|
-* ``talkiq/tester``: |tester|
 
 Development
 -----------
@@ -65,10 +63,6 @@ Note that the ``$ORBNAME``, for example, ``"talkiq/linter"``.
 .. |poetry| image:: https://badges.circleci.com/orbs/talkiq/poetry.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/poetry
-
-.. |tester| image:: https://badges.circleci.com/orbs/talkiq/tester.svg
-    :alt: Latest Version
-    :target: https://circleci.com/orbs/registry/orb/talkiq/tester
 
 .. _CircleCI Registry: https://circleci.com/orbs/registry
 .. _dev versions: https://circleci.com/docs/2.0/testing-orbs/#expansion-testing
