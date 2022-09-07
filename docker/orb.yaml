@@ -6,6 +6,14 @@ executors:
     docker:
       - image: docker:git
     resource_class: medium
+  cimg:
+    docker:
+      - image: cimg/base:stable-20.04
+        user: root
+    environment:
+      DOCKER_BUILDKIT: 1
+      COMPOSE_DOCKER_CLI_BUILD: 1
+    resource_class: small
 
 commands:
   build:
@@ -374,6 +382,94 @@ commands:
             fi
 
 jobs:
+  compose-run:
+    description: >
+      Runs Docker Compose service (v2 or greater)
+    executor: <<parameters.executor>>
+    parameters:
+      build_args:
+        default: ''
+        description: >
+          Arguments to pass to compose build, such as the services you want to
+          build or any build args.
+        type: string
+      compose_args:
+        default: '-f docker-compose.yaml'
+        description: >
+          Docker Compose args such as a chain of files to use.
+        type: string
+      configure_docker:
+        description: >
+          If there are any configurations that must occur prior to running
+          docker compose, use this parameter to specify them over pre-steps.
+          This parameter runs immediately after we've allocated a docker
+          server, but before any business logic.
+
+          In other words, you may want to set this value to something like:
+          ```
+          - gcloud/install
+          - gcloud/auth:
+              creds: myproj
+              project: MY_CREDS
+          - run: gcloud auth configure-docker --quiet
+          ```
+        type: steps
+        default: []
+      cwd:
+        default: '.'
+        description: >
+          Working directory used when running Docker Compose commands.
+        type: string
+      docker_layer_caching:
+        default: false
+        description: >
+          If enabled, turns on CircleCI's docker_layer_caching which makes
+          builds faster by skipping steps that have not changed.
+        type: boolean
+      executor:
+        default: cimg
+        description: >
+          Executor for the job. Must have a working docker version installed.
+          To use your own custom executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small cimg/base:stable-20.04 docker image with root.
+        type: executor
+      run_args:
+        default: ''
+        description: |
+          Arguments to pass to run command.
+        type: string
+      version:
+        default: 20.10.6
+        description: >
+          The docker server version to be provisioned. See the docs for
+          available versions:
+          https://circleci.com/docs/2.0/building-docker-images/#docker-version
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: <<parameters.version>>
+          docker_layer_caching: <<parameters.docker_layer_caching>>
+      - steps: <<parameters.configure_docker>>
+      - checkout
+      - run:
+          command: docker compose <<parameters.compose_args>> build <<parameters.build_args>>
+          working_directory: <<parameters.cwd>>
+      - run:
+          command: docker compose <<parameters.compose_args>> run --rm <<parameters.run_args>>
+          environment:
+            # Workaround for Docker Compose being unable to pull image from gcr
+            # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/issues/193#issuecomment-586288752
+            # This may no longer be necessary (needs testing), but doesn't
+            # break anything that we're aware of yet.
+            LD_LIBRARY_PATH: /usr/local/lib
+          working_directory: <<parameters.cwd>>
+      - run:
+          command: docker compose <<parameters.compose_args>> logs -t | sort -k 3
+          when: on_fail
+          working_directory: <<parameters.cwd>>
+
+
   publish:
     description: >
       Build, tag, and push a docker image. It will be tagged with all relevant
