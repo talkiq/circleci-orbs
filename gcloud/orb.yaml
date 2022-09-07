@@ -225,6 +225,7 @@ commands:
             kubectl patch deployment <<parameters.deployment>> \
               -p '{"spec":{"template":{"metadata":{"annotations":{"date":"'$(date +'%s')'"}}}}}'
 
+  # TODO: deprecate, covered by poetry/publish
   artifacts-package-publish:
     description: >
       This command will publish an already built package to a GCP package
@@ -267,6 +268,30 @@ commands:
           unset TWINE_CERT
           unset TWINE_NON_INTERACTIVE
           twine upload --repository-url <<parameters.repository-url>> <<parameters.path>>/<<parameters.files>>
+
+  overwrite-gcs-folder:
+    description: >
+      Delete and overwrite a folder within a GCS bucket. Assumes you've already
+      run auth and install.
+    parameters:
+      bucket:
+        description: >
+          Name of GCS bucket.
+        type: string
+      path:
+        description: >
+          Path of folder within bucket.
+        type: string
+      src:
+        description: >
+          Source folder to copy.
+        type: string
+    steps:
+      - run:
+          name: nuke pre-existing folder
+          command: |
+            gsutil -m rm -r gs://<<parameters.bucket>>/<<parameters.path>>/ ||:
+      - run: gsutil -m cp -r <<parameters.src>>/* gs://<<parameters.bucket>>/<<parameters.path>>/
 
 jobs:
   deploy-cloud-function:
