@@ -56,6 +56,12 @@ jobs:
       Runs pre-commit hooks against the current repo.
     executor: <<parameters.executor>>
     parameters:
+      cache_prefix:
+        default: ''
+        description: >
+          Optional cache prefix to be used on CircleCI. Can be used for cache
+          busting or to ensure multiple jobs use different caches.
+        type: string
       config_file:
         default: '.pre-commit-config.yaml'
         description: >
@@ -76,5 +82,6 @@ jobs:
         type: string
     steps:
       - pre-commit:
+          cache_prefix: <<parameters.cache_prefix>>
           config_file: <<parameters.config_file>>
           version: <<parameters.pre_commit_version>>
