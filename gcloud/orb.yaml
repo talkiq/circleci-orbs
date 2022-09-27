@@ -336,14 +336,11 @@ jobs:
         type: string
     steps:
       - run: apk add --no-cache --no-progress py3-pip zip
-      - run: python3 -m pip install poetry
-      - auth:
-          creds: GOOGLE_SERVICE_VOICEAI_INFRA
-          project: voiceai-infra
-      - run: poetry config http-basic.voiceai-pypi oauth2accesstoken "$(gcloud auth print-access-token circleci@voiceai-infra.iam.gserviceaccount.com)"
+      - poetry/install
       - auth:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
+      - run: poetry self add keyrings.google-artifactregistry-auth
       - checkout
       - run:
           name: generate requirements
@@ -674,3 +671,4 @@ jobs:
 
 orbs:
   docker: talkiq/docker@3
+  poetry: talkiq/poetry@4
