@@ -335,7 +335,7 @@ jobs:
           Name of GCP project to which we will push.
         type: string
     steps:
-      - run: apk add --no-cache --no-progress py3-pip zip
+      - run: apk add --no-cache --no-progress gcc musl-dev py3-pip python3-dev zip
       - poetry/install
       - auth:
           creds: <<parameters.creds>>
