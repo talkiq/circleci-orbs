@@ -28,6 +28,11 @@ commands:
         description: >
           Pre-commit package version.
         type: string
+      args:
+        default: --all-files --show-diff-on-failure
+        description: >
+          Pre-commit parameters
+        type: string
     steps:
       - when:
           condition:
@@ -48,7 +53,7 @@ commands:
           key: cache-pre-commit-<<parameters.cache_prefix>>-{{ checksum "<<parameters.config_file>>" }}
           paths:
             - ~/.cache/pre-commit
-      - run: pre-commit run --all-files --show-diff-on-failure -c <<parameters.config_file>>
+      - run: pre-commit run <<parameters.args>> -c <<parameters.config_file>>
 
 jobs:
   pre-commit:
@@ -80,8 +85,14 @@ jobs:
         description: >
           Pre-commit package version.
         type: string
+      args:
+        default: --all-files --show-diff-on-failure
+        description: >
+          Pre-commit parameters
+        type: string
     steps:
       - pre-commit:
           cache_prefix: <<parameters.cache_prefix>>
           config_file: <<parameters.config_file>>
           version: <<parameters.pre_commit_version>>
+          args: <<parameters.args>>
