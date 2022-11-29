@@ -325,12 +325,6 @@ jobs:
         description: >
           Name of the cloud function being deployed.
         type: string
-      memory:
-        default: ''
-        description: >
-          Limit on the amount of memory the function can use. Allowed values
-          are: 128MB, 256MB, 512MB, 1024MB, and 2048MB.
-        type: string
       packagename:
         description: >
           Name of the package to be deployed to this cloud function.
@@ -359,18 +353,11 @@ jobs:
             cp "./<<parameters.packagename>>/mains/<<parameters.funcname>>.py" main.py
             cp -R "./<<parameters.packagename>>" main.py requirements.txt /tmp/build
           working_directory: functions
-      - when:
-          condition: <<parameters.memory>>
-          steps:
-            - run: |
-                gcloud functions deploy <<parameters.funcname>> --memory=<<parameters.memory>> \
-                  --source="/tmp/build" <<parameters.flags>>
-      - unless:
-          condition: <<parameters.memory>>
-          steps:
-            - run: |
-                gcloud functions deploy <<parameters.funcname>> --source="/tmp/build" \
-                  <<parameters.flags>>
+      - run:
+          name: deploy cloud function
+          command: |
+            gcloud functions deploy <<parameters.funcname>> --source="/tmp/build" \
+              <<parameters.flags>>
 
   deploy-cloud-run:
     description: >
