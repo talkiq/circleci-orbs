@@ -316,15 +316,14 @@ jobs:
           `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
           Defaults to a small google/cloud-sdk:alpine docker image.
         type: executor
+      flags:
+        description: >
+          Additional flags to pass to the `gcloud functions deploy` command.
+        default: ''
+        type: string
       funcname:
         description: >
           Name of the cloud function being deployed.
-        type: string
-      memory:
-        default: ''
-        description: >
-          Limit on the amount of memory the function can use. Allowed values
-          are: 128MB, 256MB, 512MB, 1024MB, and 2048MB.
         type: string
       packagename:
         description: >
@@ -354,17 +353,11 @@ jobs:
             cp "./<<parameters.packagename>>/mains/<<parameters.funcname>>.py" main.py
             cp -R "./<<parameters.packagename>>" main.py requirements.txt /tmp/build
           working_directory: functions
-      - when:
-          condition: <<parameters.memory>>
-          steps:
-            - run: |
-                gcloud functions deploy <<parameters.funcname>> --memory=<<parameters.memory>> \
-                  --source="/tmp/build"
-      - unless:
-          condition: <<parameters.memory>>
-          steps:
-            - run: |
-                gcloud functions deploy <<parameters.funcname>> --source="/tmp/build"
+      - run:
+          name: deploy cloud function
+          command: |
+            gcloud functions deploy <<parameters.funcname>> --source="/tmp/build" \
+              <<parameters.flags>>
 
   deploy-cloud-run:
     description: >
