@@ -102,6 +102,7 @@ commands:
             - run: curl -Lo/tmp/kubectl "https://dl.k8s.io/release/<<parameters.kubectl_version>>/bin/linux/amd64/kubectl"
             - run: install -o root -g root -m 0755 /tmp/kubectl /usr/local/bin/kubectl
       - run: kubectl version --client
+      - run: gcloud components install --quiet gke-gcloud-auth-plugin
       - run: gcloud config set container/cluster <<parameters.cluster>>
       - run: gcloud container clusters get-credentials <<parameters.cluster>> --zone=<<parameters.zone>>
 
