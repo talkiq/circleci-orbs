@@ -111,9 +111,7 @@ commands:
       package managers: apk, apt-get.
     parameters:
       version:
-        # N.B. version 376.0.0 (currently latest) is broken on musl systems, as
-        # it contains a glibc shared object.
-        default: '375.0.0'
+        default: 'latest'
         description: >
           Version of gcloud to install. Set to "latest" or a specified version
           such as "375.0.0".
