@@ -434,14 +434,28 @@ jobs:
       - unless:
           condition: <<parameters.cluster>>
           steps:
-            - run: |
-                gcloud run deploy <<parameters.deployment>> \
-                  --platform=managed <<parameters.managed_flags>> \
-                  --image="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
-                  --cpu=<<parameters.cpu>> \
-                  --memory=<<parameters.memory>> \
-                  --region=<<parameters.region>> \
-                  --set-env-vars <<parameters.env_vars>> &> output
+            - unless:
+                condition: <<parameters.env_vars>>
+                steps:
+                  - run: |
+                      gcloud run deploy <<parameters.deployment>> \
+                        --platform=managed <<parameters.managed_flags>> \
+                        --image="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
+                        --cpu=<<parameters.cpu>> \
+                        --memory=<<parameters.memory>> \
+                        --region=<<parameters.region>> \
+                        --clear-env-vars &> output
+            - when:
+                condition: <<parameters.env_vars>>
+                steps:
+                  - run: |
+                      gcloud run deploy <<parameters.deployment>> \
+                        --platform=managed <<parameters.managed_flags>> \
+                        --image="gcr.io/<<parameters.project>>/<<parameters.image>>:${CIRCLE_SHA1:0:10}" \
+                        --cpu=<<parameters.cpu>> \
+                        --memory=<<parameters.memory>> \
+                        --region=<<parameters.region>> \
+                        --set-env-vars <<parameters.env_vars>> &> output
             - run: |
                 gcloud run services update-traffic <<parameters.deployment>> \
                   --platform=managed \
