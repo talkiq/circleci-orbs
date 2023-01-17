@@ -122,7 +122,8 @@ commands:
           name: install dependencies
           command: |
             if which apk >/dev/null; then
-              apk add --no-cache --no-progress bash curl python3
+              apk upgrade
+              apk add --update-cache --no-progress bash curl python3
             elif which apt-get >/dev/null; then
               apt-get update -qy
               apt-get install -qy bash curl python
