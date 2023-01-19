@@ -29,7 +29,9 @@ commands:
       - run:
           name: install curl
           command: |
-            if which apk >/dev/null; then
+            if which curl >/dev/null; then
+              exit 0
+            elif which apk >/dev/null; then
               apk add --no-cache --no-progress curl curl-dev
             elif which apt-get >/dev/null; then
               apt-get update -qy
