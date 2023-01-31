@@ -19,6 +19,8 @@ commands:
       Uses slack orb to send messages to slack when a job fails.
       Note that if a job uses parallelism or matrix, it will send as many
       messages as jobs executed.
+
+      Requires $SLACK_ACCESS_TOKEN to be set.
     parameters:
       channel:
         default: ${SLACK_DEFAULT_CHANNEL}
