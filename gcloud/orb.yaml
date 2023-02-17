@@ -169,12 +169,6 @@ commands:
               ln -s /root/google-cloud-sdk/bin/gcloud /usr/bin/gcloud
             fi
       - run:
-          name: symlink gsutil
-          command: |
-            if [ ! -f /usr/bin/gsutil ]; then
-              ln -s /root/google-cloud-sdk/bin/gsutil /usr/bin/gsutil
-            fi
-      - run:
           name: symlink docker-credential-gcloud
           command: |
             if [ ! -f /usr/bin/docker-credential-gcloud ]; then
@@ -293,8 +287,8 @@ commands:
       - run:
           name: nuke pre-existing folder
           command: |
-            gsutil -m rm -r gs://<<parameters.bucket>>/<<parameters.path>>/ ||:
-      - run: gsutil -m cp -r <<parameters.src>>/* gs://<<parameters.bucket>>/<<parameters.path>>/
+            gcloud storage rm -r gs://<<parameters.bucket>>/<<parameters.path>>/ ||:
+      - run: gcloud storage cp -r <<parameters.src>>/* gs://<<parameters.bucket>>/<<parameters.path>>/
 
 jobs:
   deploy-cloud-function:
