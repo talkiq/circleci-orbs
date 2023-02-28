@@ -38,12 +38,12 @@ commands:
           condition:
             equal: [latest, <<parameters.version>>]
           steps:
-            - run: python -m pip install --progress-bar=off pre-commit
+            - run: python3 -m pip install --progress-bar=off pre-commit
       - unless:
           condition:
             equal: [latest, <<parameters.version>>]
           steps:
-            - run: python -m pip install --progress-bar=off pre-commit==<<parameters.version>>
+            - run: python3 -m pip install --progress-bar=off pre-commit==<<parameters.version>>
       - checkout
       - restore_cache:
           keys:
