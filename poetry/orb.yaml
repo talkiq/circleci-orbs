@@ -103,7 +103,7 @@ jobs:
       - steps: <<parameters.configure_poetry>>
       - checkout
       - run:
-          command: poetry install -n <<parameters.install_flags>>
+          command: poetry install -n --no-ansi <<parameters.install_flags>>
           working_directory: <<parameters.cwd>>
       - steps: <<parameters.commands>>
 
