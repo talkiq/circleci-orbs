@@ -457,12 +457,6 @@ jobs:
           working_directory: <<parameters.cwd>>
       - run:
           command: docker compose <<parameters.compose_args>> run --rm <<parameters.run_args>>
-          environment:
-            # Workaround for Docker Compose being unable to pull image from gcr
-            # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/issues/193#issuecomment-586288752
-            # This may no longer be necessary (needs testing), but doesn't
-            # break anything that we're aware of yet.
-            LD_LIBRARY_PATH: /usr/local/lib
           working_directory: <<parameters.cwd>>
       - run:
           command: docker compose <<parameters.compose_args>> logs -t | sort -k 3
