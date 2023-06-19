@@ -131,7 +131,8 @@ commands:
               apk add --update-cache --no-progress bash curl python3
             elif which apt-get >/dev/null; then
               apt-get update -qy
-              apt-get install -qy bash curl python
+              source /etc/os-release
+              { (( $VERSION_ID < 12 )) && echo python || echo python3; } | xargs apt-get install -qy bash curl
             else
               echo >&2 "ERROR: could not find supported package manager"
               exit 1
