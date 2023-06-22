@@ -36,7 +36,7 @@ Do we need to update an [architecture diagram](https://docs.talkiq-echelon.talki
 - [ ] The architecture diagrams have been updated, if need be
 <!---
 If there are any other related changes which should be reviewed together, or
-other work whih must be deployed first, have you linked to them and described
+other work which must be deployed first, have you linked to them and described
 the interaction?
 --->
 - [ ] Any external changes/dependencies are linked and described
