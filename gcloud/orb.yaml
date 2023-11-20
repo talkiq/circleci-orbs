@@ -544,7 +544,7 @@ jobs:
       - configure-gke:
           cluster: <<parameters.cluster>>
           zone: <<parameters.zone>>
-      - run: mkdir -p /metadata/prev_version/<<parameters.deployment>>
+      - run: mkdir -p /metadata/prev_version/<<parameters.deployment>>/<<parameters.cluster>>
       - when:
           condition: <<parameters.version_selector>>
           steps:
@@ -555,14 +555,14 @@ jobs:
                   # manifest, parse out the tag as the last (3rd) chunk of img, and
                   # further split the tag to retrieve the rightmost chunk: the commit
                   # hash.
-                  kubectl get deployments -l <<parameters.version_selector>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>>
+                  kubectl get deployments -l <<parameters.version_selector>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.cluster>>/<<parameters.zone>>
       - unless:
           condition: <<parameters.version_selector>>
           steps:
             - run:
                 name: store previous version
                 command: |
-                  kubectl get deployments <<parameters.deployment>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.zone>>
+                  kubectl get deployments <<parameters.deployment>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.cluster>>/<<parameters.zone>>
       - when:
           condition: <<parameters.prune_selector>>
           steps:
@@ -580,7 +580,7 @@ jobs:
       - persist_to_workspace:
           root: /metadata
           paths:
-            - prev_version/<<parameters.deployment>>/<<parameters.zone>>
+            - prev_version/<<parameters.deployment>>/<<parameters.cluster>>/<<parameters.zone>>
 
   docker-publish:
     description: >
