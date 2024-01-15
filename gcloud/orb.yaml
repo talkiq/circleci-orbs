@@ -648,6 +648,13 @@ jobs:
         description: >
           Container registry to-be-used.
         type: string
+      docker_version:
+        default: 20.10.6
+        description: >
+          The docker server version to be provisioned. See the docs for
+          available versions:
+          https://circleci.com/docs/2.0/building-docker-images/#docker-version
+        type: string
       workspace:
         default: ''
         description: >
@@ -661,6 +668,7 @@ jobs:
           project: <<parameters.project>>
       - configure-docker:
           docker_layer_caching: <<parameters.docker_layer_caching>>
+          version: <<parameters.docker_version>>
       - when:
           condition: <<parameters.git_repository_url>>
           steps:
