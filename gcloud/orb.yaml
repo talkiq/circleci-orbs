@@ -54,7 +54,7 @@ commands:
           builds faster by skipping steps that have not changed.
         type: boolean
       version:
-        default: 20.10.6
+        default: default
         description: >
           The docker server version to be provisioned. See the docs for
           available versions:
