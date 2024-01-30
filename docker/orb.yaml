@@ -440,7 +440,7 @@ jobs:
           Arguments to pass to run command.
         type: string
       version:
-        default: 20.10.6
+        default: default
         description: >
           The docker server version to be provisioned. See the docs for
           available versions:
