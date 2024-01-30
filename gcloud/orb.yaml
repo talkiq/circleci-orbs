@@ -53,6 +53,17 @@ commands:
           If enabled, turns on CircleCI's docker_layer_caching which makes
           builds faster by skipping steps that have not changed.
         type: boolean
+      registries:
+        default: ''
+        description: >
+          Comma-separated list of registries to configure the credential helper
+          for. Defaults to all normal Google upstream behavior, which is to
+          connect to all Container Registry registries. If you have migrated to
+          Artifact Registry, you must pass the correct registry value here,
+          such as us-docker.pkg.dev.
+          Note that Google recommends specifying a non-default smaller list of
+          registries anyway for performance reasons.
+        type: string
       version:
         default: 20.10.6
         description: >
@@ -64,7 +75,7 @@ commands:
       - setup_remote_docker:
           version: <<parameters.version>>
           docker_layer_caching: <<parameters.docker_layer_caching>>
-      - run: gcloud auth configure-docker --quiet
+      - run: gcloud auth configure-docker <<parameters.registries>> --quiet
 
   configure-gke:
     description: >
@@ -668,6 +679,7 @@ jobs:
           project: <<parameters.project>>
       - configure-docker:
           docker_layer_caching: <<parameters.docker_layer_caching>>
+          registries: <<parameters.registry>>
           version: <<parameters.docker_version>>
       - when:
           condition: <<parameters.git_repository_url>>
