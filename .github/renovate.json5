@@ -1,0 +1,20 @@
+{
+  "assignees": ["TheKevJames"],
+  "extends": [
+    "github>thekevjames/tools",
+    "github>thekevjames/tools:trustedpackages"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+  ],
+  "circleci": {
+    "fileMatch": ["(^|/)orb\\.ya?ml$"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": "before 1pm on monday"
+  },
+}
