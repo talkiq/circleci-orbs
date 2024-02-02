@@ -346,8 +346,7 @@ jobs:
         type: string
     steps:
       - run: apk add --no-cache --no-progress gcc musl-dev py3-pip python3-dev zip
-      - poetry/install:
-          version: 1.2.2
+      - poetry/install
       - auth:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
