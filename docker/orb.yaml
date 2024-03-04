@@ -8,7 +8,7 @@ executors:
     resource_class: medium
   cimg:
     docker:
-      - image: cimg/base:stable-20.04
+      - image: cimg/base:current
         user: root
     environment:
       DOCKER_BUILDKIT: 1
@@ -427,12 +427,12 @@ jobs:
           builds faster by skipping steps that have not changed.
         type: boolean
       executor:
-        default: cimg
+        default: cimg/base:current
         description: >
           Executor for the job. Must have a working docker version installed.
           To use your own custom executor, see
           `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
-          Defaults to a small cimg/base:stable-20.04 docker image with root.
+          Defaults to a small cimg/base:current docker image with root.
         type: executor
       run_args:
         default: ''

@@ -659,7 +659,7 @@ jobs:
           Container registry to-be-used.
         type: string
       docker_version:
-        default: 20.10.6
+        default: default
         description: >
           The docker server version to be provisioned. See the docs for
           available versions:
