@@ -427,7 +427,7 @@ jobs:
           builds faster by skipping steps that have not changed.
         type: boolean
       executor:
-        default: cimg/base:current
+        default: cimg
         description: >
           Executor for the job. Must have a working docker version installed.
           To use your own custom executor, see
