@@ -36,13 +36,31 @@ Latest Versions
 Development
 -----------
 
-To release a new version of any orb, force push the tag corresponding to that
-orb and the given release type: ``$ORBNAME-{major,minor,patch}``. Please be
-sure to do this only off of commits on master; any other commits on any other
-branches will release `dev versions`_, which should be enough for testing
-pre-merge.
+Every commit will build dev versions of all our orbs, which can be used within
+any other ``talkiq`` repos for up to 30 days. Check the output of the
+``publish-dev-orbs-${ORBNAME}`` job to see the version number; it should look
+something like this: ``talkiq/poetry@dev:628e28f``. This version string string
+can be used directly, eg. by applying the following change in another repo, for
+the purpose of testing:
 
-Note that the ``$ORBNAME``, for example, ``"talkiq/linter"``.
+.. code-block:: diff
+
+    - poetry: talkiq/poetry@4
+    + poetry: talkiq/poetry@dev:628e28f
+
+Once your PR has been merged, you can release a new version of any orb by force
+push the tag corresponding to that orb and the given release type:
+``${ORBNAME}-{major,minor,patch}``. For example:
+
+.. code-block:: bash
+
+    git tag -f talkiq/linter-patch && git push -f origin talkiq/linter-patch
+
+Please be sure to do this only off of commits on master! The `dev versions`_
+described above should be enough for testing your changes pre-merge.
+
+Note that the ``${ORBNAME}``, for example, is namespaced with ``talkiq`` and so
+should be formatted as, eg. ``"talkiq/linter"``.
 
 .. |docker| image:: https://badges.circleci.com/orbs/talkiq/docker.svg
     :alt: Latest Version
