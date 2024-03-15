@@ -222,7 +222,7 @@ commands:
           command: |
             kubectl patch configmap/<<parameters.configmap>> \
               --type merge -p "$(cat patch.yaml)"
-  
+
   patch-configmap-entry-variants:
     description: >
       Update (or add) an entry in a configmap. Preserves all other entries.
