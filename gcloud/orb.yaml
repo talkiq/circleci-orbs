@@ -222,6 +222,25 @@ commands:
           command: |
             kubectl patch configmap/<<parameters.configmap>> \
               --type merge -p "$(cat patch.yaml)"
+  
+  patch-configmap-entry-variants:
+    description: >
+      Update (or add) an entry in a configmap. Preserves all other entries.
+    parameters:
+      configmap:
+        description: >
+          Name of the target k8s configmap.
+        type: string
+      entry_data:
+        description: >
+          File that contains the patch configmap.
+        type: string
+    steps:
+      - run:
+          name: patch entry in configmap
+          command: |
+            kubectl patch configmap/<<parameters.configmap>> \
+              --type merge -p "$(cat <<parameters.entry_data>>)"
 
   force-redeploy-gke:
     description: >
