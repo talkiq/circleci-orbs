@@ -437,14 +437,14 @@ jobs:
                   # manifest, parse out the tag as the last (3rd) chunk of img, and
                   # further split the tag to retrieve the rightmost chunk: the commit
                   # hash.
-                  kubectl get deployments -l <<parameters.version_selector>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.cluster>>/<<parameters.zone>>
+                  kubectl get deployments -l <<parameters.version_selector>> --ignore-not-found=true -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.cluster>>/<<parameters.zone>>
       - unless:
           condition: <<parameters.version_selector>>
           steps:
             - run:
                 name: store previous version
                 command: |
-                  kubectl get deployments <<parameters.deployment>> -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.cluster>>/<<parameters.zone>>
+                  kubectl get deployments <<parameters.deployment>> --ignore-not-found=true -oyaml | awk '/image: / {split($0,img,":"); len=split(img[3],tag,"-"); print tag[len]}' | tail -n1 > /metadata/prev_version/<<parameters.deployment>>/<<parameters.cluster>>/<<parameters.zone>>
       - when:
           condition: <<parameters.prune_selector>>
           steps:
