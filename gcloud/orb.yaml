@@ -22,6 +22,11 @@ commands:
           Name of environment variable storing the base64-encoded service key
           for the GCP project.
         type: env_var_name
+      creds_dest_file:
+        default: /key.json
+        description: >
+          The path and file where the creds will be stored.
+        type: string
       project:
         default: ""
         description: The Google project ID to connect with via the gcloud CLI.
@@ -31,8 +36,8 @@ commands:
         description: The Google zone to use via the gcloud CLI.
         type: string
     steps:
-      - run: echo "${<<parameters.creds>>}" | base64 -d > /key.json
-      - run: gcloud auth activate-service-account --key-file=/key.json
+      - run: echo "${<<parameters.creds>>}" | base64 -d > <<parameters.creds_dest_file>>
+      - run: gcloud auth activate-service-account --key-file=<<parameters.creds_dest_file>>
       - when:
           condition: <<parameters.project>>
           steps:
