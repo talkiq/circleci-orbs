@@ -118,6 +118,12 @@ jobs:
           workflows with complicated build processes.
         type: boolean
         default: true
+      build_timeout:
+        description: >
+          Sets the timeout value for 'poetry build' step. Useful for
+          workflows with longer build times.
+        type: string
+        default: 10m
       cwd:
         default: '.'
         description: >
@@ -173,6 +179,7 @@ jobs:
           steps:
             - run:
                 command: poetry build
+                no_output_timeout: <<parameters.build_timeout>>
                 working_directory: <<parameters.cwd>>
       - when:
           condition: << parameters.repository_url >>
