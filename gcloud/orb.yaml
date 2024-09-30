@@ -351,6 +351,7 @@ jobs:
           creds: <<parameters.creds>>
           project: <<parameters.project>>
       - run: poetry self add keyrings.google-artifactregistry-auth
+      - run: poetry self add poetry-plugin-export
       - checkout
       - run:
           name: generate requirements
