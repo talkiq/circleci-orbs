@@ -1,6 +1,9 @@
 version: 2.1
 description: "Tools for running lint commands"
 
+orbs:
+  gcloud: talkiq/gcloud@12
+
 executors:
   python-latest:
     docker:
@@ -78,6 +81,11 @@ jobs:
         description: >
           Pre-commit package version.
         type: string
+      gcp_project:
+        default: ''
+        description: >
+          The Google project ID to connect with via the gcloud CLI.
+        type: string
     steps:
       - run:
           name: create and activate venv
@@ -94,6 +102,13 @@ jobs:
             equal: [<<parameters.version>>, latest]
           steps:
             - run: python3 -m pip install --progress-bar=off "pre-commit==<<parameters.version>>"
+      - when:
+          condition: <<parameters.gcp_project>>
+          steps:
+            - gcloud/install
+            - gcloud/auth:
+                project: <<parameters.gcp_project>>
+            - run: python3 -m pip install --progress-bar=off keyring keyrings.google-artifactregistry-auth
       - pre-commit:
           cache_prefix: <<parameters.cache_prefix>>
           config_file: <<parameters.config_file>>
