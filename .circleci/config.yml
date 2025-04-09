@@ -7,7 +7,7 @@ orbs:
 executors:
   python:
     docker:
-      - image: python:3.12.9
+      - image: python:3.12.10
     resource_class: small
 
 workflows:
