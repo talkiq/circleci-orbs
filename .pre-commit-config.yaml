@@ -41,4 +41,5 @@ repos:
     - id: check-github-workflows
     - id: check-renovate
       additional_dependencies:
-      - pyjson5
+      # renovate: datasource=pypi depName=pyjson5
+      - pyjson5==1.6.8
