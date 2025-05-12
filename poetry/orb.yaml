@@ -28,11 +28,19 @@ commands:
       - run:
           name: install curl
           command: |
+            if [ -n "$(command -v curl)" ]; then
+              return
+            fi
+            if cat /etc/issue | grep "Alpine" >/dev/null 2>&1; then
+              if [ "$ID" = 0 ]; then export SUDO=""; else export SUDO="sudo"; fi
+            else
+              if [[ $EUID == 0 ]]; then export SUDO=""; else export SUDO="sudo"; fi
+            fi
             if which apk >/dev/null; then
-              apk add --no-cache --no-progress curl
+              $SUDO apk add --no-cache --no-progress curl
             elif which apt-get >/dev/null; then
-              apt-get update -qy
-              apt-get install -qy curl
+              $SUDO apt-get update -qy
+              $SUDO apt-get install -qy curl
             else
               echo >&2 "ERROR: could not find supported package manager"
               exit 1
