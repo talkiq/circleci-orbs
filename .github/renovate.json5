@@ -1,20 +1,26 @@
 {
-  "assignees": ["TheKevJames"],
-  "extends": [
-    "github>thekevjames/tools",
-    "github>thekevjames/tools:trustedpackages"
+  assignees: [
+    'TheKevJames',
   ],
-  "packageRules": [
+  extends: [
+    'github>thekevjames/tools',
+    'github>thekevjames/tools:trustedpackages',
+  ],
+  packageRules: [
     {
-      "matchUpdateTypes": ["patch"],
-      "automerge": true
+      matchUpdateTypes: [
+        'patch',
+      ],
+      automerge: true,
     },
   ],
-  "circleci": {
-    "fileMatch": ["(^|/)orb\\.ya?ml$"]
+  circleci: {
+    managerFilePatterns: [
+      '/(^|/)orb\\.ya?ml$/',
+    ],
   },
-  "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": "before 1pm on monday"
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: 'before 1pm on monday',
   },
 }
