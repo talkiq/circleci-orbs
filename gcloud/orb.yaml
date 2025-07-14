@@ -555,6 +555,12 @@ jobs:
           available versions:
           https://circleci.com/docs/2.0/building-docker-images/#docker-version
         type: string
+      workspace:
+        default: ''
+        description: >
+          If specified, attaches the specified workspace and copies it into the
+          Docker context before building.
+        type: string
       # New parameter for docker-publish job to control tagging behavior
       tags_to_apply:
         default: "commit,branch,tag,latest"
