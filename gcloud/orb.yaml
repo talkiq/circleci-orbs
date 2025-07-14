@@ -578,6 +578,14 @@ jobs:
           condition: <<parameters.git_repository_url>>
           steps:
             - checkout
+      - run:
+          name: Determine tags to apply
+          command: |
+            TAGS_TO_APPLY="commit,branch,tag" # Default tags
+            if [[ "${CIRCLE_BRANCH}" == "master" || "${CIRCLE_BRANCH}" == "main" ]]; then
+              TAGS_TO_APPLY="${TAGS_TO_APPLY},latest"
+            fi
+            echo "export DOCKER_FINAL_TAGS_TO_APPLY=$TAGS_TO_APPLY" >> "$BASH_ENV"
       - docker/build:
           build_args: <<parameters.build_args>>
           dockerfile: <<parameters.dockerfile>>
@@ -586,9 +594,11 @@ jobs:
       - docker/tag:
           image: <<parameters.project>>/<<parameters.image>>
           registry: <<parameters.registry>>
+          tags_to_apply: "${DOCKER_FINAL_TAGS_TO_APPLY}"
       - docker/push:
           image: <<parameters.project>>/<<parameters.image>>
           registry: <<parameters.registry>>
+          tags_to_apply: "${DOCKER_FINAL_TAGS_TO_APPLY}"
 
 orbs:
   docker: talkiq/docker@3.1.0
