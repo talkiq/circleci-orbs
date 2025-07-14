@@ -179,7 +179,7 @@ commands:
 
   tag-with-latest:
     description: >
-      Give your built docker image a tag of "latest".
+      Give your built docker image a tag of "latest", only if the branch is master or main.
     parameters:
       image:
         default: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
@@ -205,9 +205,11 @@ commands:
       - run:
           name: docker tag (latest)
           command: |
-            docker tag \
-              "<<parameters.local_image_name>>" \
-              "<<parameters.registry>>/<<parameters.image>>:latest"
+            if [[ "${CIRCLE_BRANCH}" == "master" || "${CIRCLE_BRANCH}" == "main" ]]; then
+              docker tag \
+                "<<parameters.local_image_name>>" \
+                "<<parameters.registry>>/<<parameters.image>>:latest"
+            fi
 
   tag-with-tag:
     description: >
@@ -329,7 +331,7 @@ commands:
 
   push-with-latest:
     description: >
-      Push the built docker image tagged with "latest".
+      Push the built docker image tagged with "latest", only if the branch is master or main.
     parameters:
       image:
         default: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
@@ -348,7 +350,9 @@ commands:
       - run:
           name: docker push (latest)
           command: |
-            docker push "<<parameters.registry>>/<<parameters.image>>:latest"
+            if [[ "${CIRCLE_BRANCH}" == "master" || "${CIRCLE_BRANCH}" == "main" ]]; then
+              docker push "<<parameters.registry>>/<<parameters.image>>:latest"
+            fi
 
   push-with-tag:
     description: >
