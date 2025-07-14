@@ -561,15 +561,6 @@ jobs:
           If specified, attaches the specified workspace and copies it into the
           Docker context before building.
         type: string
-      # New parameter for docker-publish job to control tagging behavior
-      tags_to_apply:
-        default: "commit,branch,tag,latest"
-        description: >
-          Comma-separated list of tag types to apply during the tagging and pushing phases.
-          Valid values: 'commit', 'branch', 'tag', 'latest'.
-          If the branch is 'master' or 'main', only 'latest' will be applied
-          if 'latest' is in this list, and all other types will be ignored.
-        type: string
     steps:
       - install
       - auth:
@@ -590,17 +581,11 @@ jobs:
       - run:
           name: Determine tags to apply
           command: |
-            ACTUAL_TAGS_TO_APPLY="<<parameters.tags_to_apply>>"
-            # Override if on master/main branch to only apply 'latest' if it's requested
+            TAGS_TO_APPLY="commit,branch,tag" # Default tags
             if [[ "${CIRCLE_BRANCH}" == "master" || "${CIRCLE_BRANCH}" == "main" ]]; then
-              if echo "$ACTUAL_TAGS_TO_APPLY" | grep -q "\blatest\b"; then
-                ACTUAL_TAGS_TO_APPLY="latest"
-              else
-                # If 'latest' wasn't in the original list for master/main, then no tags
-                ACTUAL_TAGS_TO_APPLY=""
-              fi
+              TAGS_TO_APPLY="${TAGS_TO_APPLY},latest"
             fi
-            echo "export DOCKER_FINAL_TAGS_TO_APPLY=$ACTUAL_TAGS_TO_APPLY" >> "$BASH_ENV"
+            echo "export DOCKER_FINAL_TAGS_TO_APPLY=$TAGS_TO_APPLY" >> "$BASH_ENV"
       - docker/build:
           build_args: <<parameters.build_args>>
           dockerfile: <<parameters.dockerfile>>
@@ -609,11 +594,11 @@ jobs:
       - docker/tag:
           image: <<parameters.project>>/<<parameters.image>>
           registry: <<parameters.registry>>
-          tags_to_apply: "${DOCKER_FINAL_TAGS_TO_APPLY}" # Use the determined value
+          tags_to_apply: "${DOCKER_FINAL_TAGS_TO_APPLY}"
       - docker/push:
           image: <<parameters.project>>/<<parameters.image>>
           registry: <<parameters.registry>>
-          tags_to_apply: "${DOCKER_FINAL_TAGS_TO_APPLY}" # Use the determined value
+          tags_to_apply: "${DOCKER_FINAL_TAGS_TO_APPLY}"
 
 orbs:
   docker: talkiq/docker@3.1.0
