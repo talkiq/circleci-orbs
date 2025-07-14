@@ -69,7 +69,7 @@ commands:
 
   tag:
     description: >
-      Tag the docker image with all relevant metadata: commit hash, branch (if
+      Tag the docker image with selected metadata: commit hash, branch (if
       this is a branch build), tag (if this is a tag build), and "latest".
     parameters:
       image:
@@ -92,23 +92,46 @@ commands:
         description: >
           Container registry to-be-used.
         type: string
+      tags_to_apply:
+        default: "commit,branch,tag,latest"
+        description: >
+          Comma-separated list of tag types to apply.
+          Valid values: 'commit', 'branch', 'tag', 'latest'.
+        type: string
     steps:
-      - tag-with-commit:
-          image: <<parameters.image>>
-          local_image_name: <<parameters.local_image_name>>
-          registry: <<parameters.registry>>
-      - tag-with-branch:
-          image: <<parameters.image>>
-          local_image_name: <<parameters.local_image_name>>
-          registry: <<parameters.registry>>
-      - tag-with-tag:
-          image: <<parameters.image>>
-          local_image_name: <<parameters.local_image_name>>
-          registry: <<parameters.registry>>
-      - tag-with-latest:
-          image: <<parameters.image>>
-          local_image_name: <<parameters.local_image_name>>
-          registry: <<parameters.registry>>
+      - when:
+          condition: |
+            echo "<<parameters.tags_to_apply>>" | grep -q "\bcommit\b"
+          steps:
+            - tag-with-commit:
+                image: <<parameters.image>>
+                local_image_name: <<parameters.local_image_name>>
+                registry: <<parameters.registry>>
+      - when:
+          condition: |
+            echo "<<parameters.tags_to_apply>>" | grep -q "\bbranch\b"
+          steps:
+            - tag-with-branch:
+                image: <<parameters.image>>
+                local_image_name: <<parameters.local_image_name>>
+                registry: <<parameters.registry>>
+      - when:
+          condition: |
+            echo "<<parameters.tags_to_apply>>" | grep -q "\btag\b"
+          steps:
+            - tag-with-tag:
+                image: <<parameters.image>>
+                local_image_name: <<parameters.local_image_name>>
+                registry: <<parameters.registry>>
+      - when:
+          condition: |
+            echo "<<parameters.tags_to_apply>>" | grep -q "\blatest\b"
+          steps:
+            - tag-with-latest:
+                image: <<parameters.image>>
+                local_image_name: <<parameters.local_image_name>>
+                registry: <<parameters.registry>>
+
 
   tag-with-commit:
     description: >
@@ -263,19 +286,41 @@ commands:
         description: >
           Container registry to-be-used.
         type: string
+      tags_to_apply: # Added this parameter to the push command
+        default: "commit,branch,tag,latest"
+        description: >
+          Comma-separated list of tag types to push.
+          Valid values: 'commit', 'branch', 'tag', 'latest'.
+        type: string
     steps:
-      - push-with-commit:
-          image: <<parameters.image>>
-          registry: <<parameters.registry>>
-      - push-with-branch:
-          image: <<parameters.image>>
-          registry: <<parameters.registry>>
-      - push-with-tag:
-          image: <<parameters.image>>
-          registry: <<parameters.registry>>
-      - push-with-latest:
-          image: <<parameters.image>>
-          registry: <<parameters.registry>>
+      - when:
+          condition: |
+            echo "<<parameters.tags_to_apply>>" | grep -q "\bcommit\b"
+          steps:
+            - push-with-commit:
+                image: <<parameters.image>>
+                registry: <<parameters.registry>>
+      - when:
+          condition: |
+            echo "<<parameters.tags_to_apply>>" | grep -q "\bbranch\b"
+          steps:
+            - push-with-branch:
+                image: <<parameters.image>>
+                registry: <<parameters.registry>>
+      - when:
+          condition: |
+            echo "<<parameters.tags_to_apply>>" | grep -q "\btag\b"
+          steps:
+            - push-with-tag:
+                image: <<parameters.image>>
+                registry: <<parameters.registry>>
+      - when:
+          condition: |
+            echo "<<parameters.tags_to_apply>>" | grep -q "\blatest\b"
+          steps:
+            - push-with-latest:
+                image: <<parameters.image>>
+                registry: <<parameters.registry>>
 
   push-with-commit:
     description: >
@@ -513,6 +558,12 @@ jobs:
           If specified, attaches the specified workspace and copies it into the
           Docker context before building.
         type: string
+      tags_to_apply:
+        default: "commit,branch,tag,latest"
+        description: >
+          Comma-separated list of tag types to apply during the tagging and pushing phases.
+          Valid values: 'commit', 'branch', 'tag', 'latest'.
+        type: string
     steps:
       - checkout
       - build:
@@ -523,6 +574,9 @@ jobs:
       - tag:
           image: <<parameters.image>>
           registry: <<parameters.registry>>
+          local_image_name: ${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1:0:10}
+          tags_to_apply: <<parameters.tags_to_apply>>
       - push:
           image: <<parameters.image>>
           registry: <<parameters.registry>>
+          tags_to_apply: <<parameters.tags_to_apply>> # Pass the parameter to push
