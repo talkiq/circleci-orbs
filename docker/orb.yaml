@@ -270,18 +270,10 @@ commands:
           Container registry to-be-used.
         type: string
     steps:
-      - push-with-commit:
-          image: <<parameters.image>>
-          registry: <<parameters.registry>>
-      - push-with-branch:
-          image: <<parameters.image>>
-          registry: <<parameters.registry>>
-      - push-with-tag:
-          image: <<parameters.image>>
-          registry: <<parameters.registry>>
-      - push-with-latest:
-          image: <<parameters.image>>
-          registry: <<parameters.registry>>
+      - run:
+          name: docker push (all-tags)
+          command: |
+            docker push --all-tags <<parameters.registry>>/<<parameters.image>>
 
   push-with-commit:
     description: >
