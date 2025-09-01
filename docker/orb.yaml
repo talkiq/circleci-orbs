@@ -279,9 +279,15 @@ commands:
       - push-with-tag:
           image: <<parameters.image>>
           registry: <<parameters.registry>>
-      - push-with-latest:
-          image: <<parameters.image>>
-          registry: <<parameters.registry>>
+      - when:
+          condition:
+            or:
+              - equal: [ master, CIRCLE_BRANCH ]
+              - equal: [ main, CIRCLE_BRANCH ]
+          steps:
+            - push-with-latest:
+                image: <<parameters.image>>
+                registry: <<parameters.registry>>
 
   push-with-commit:
     description: >
