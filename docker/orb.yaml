@@ -105,17 +105,14 @@ commands:
           image: <<parameters.image>>
           local_image_name: <<parameters.local_image_name>>
           registry: <<parameters.registry>>
-      - when: # Added condition for tag-with-latest
-          condition:
-            or:
-              - equal: [ master, "${CIRCLE_BRANCH}" ]
-              - equal: [ main, "${CIRCLE_BRANCH}" ]
-              - equal: [ oli/test-docker-orb, "${CIRCLE_BRANCH}" ]
-          steps:
-            - tag-with-latest:
-                image: <<parameters.image>>
-                local_image_name: <<parameters.local_image_name>>
-                registry: <<parameters.registry>>
+      - run: # Added condition for tag-with-latest
+          name: docker tag (latest)
+          command: |
+            if [[ "${CIRCLE_BRANCH}" == "main" || "${CIRCLE_BRANCH}" == "master" || "${CIRCLE_BRANCH}" == "oli/test-docker-orb" ]]; then
+              docker tag \
+                "<<parameters.local_image_name>>" \
+                "<<parameters.registry>>/<<parameters.image>>:latest"
+            fi
 
   tag-with-commit:
     description: >
