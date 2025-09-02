@@ -108,8 +108,9 @@ commands:
       - when: # Added condition for tag-with-latest
           condition:
             or:
-              - equal: [ master, CIRCLE_BRANCH ]
-              - equal: [ main, CIRCLE_BRANCH ]
+              - equal: [ master, ${CIRCLE_BRANCH} ]
+              - equal: [ main, ${CIRCLE_BRANCH} ]
+              - equal: [ oli/test-docker-orb, ${CIRCLE_BRANCH} ]
           steps:
             - tag-with-latest:
                 image: <<parameters.image>>
