@@ -591,5 +591,5 @@ jobs:
           registry: <<parameters.registry>>
 
 orbs:
-  docker: talkiq/docker@dev:cdf7dcd
+  docker: talkiq/docker@dev:328b6d1
   poetry: talkiq/poetry@4.1.0
