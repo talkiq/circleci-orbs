@@ -108,8 +108,8 @@ commands:
       - when: # Added condition for tag-with-latest
           condition:
             or:
-              - equal: [ master, CIRCLE_BRANCH ]
-              - equal: [ main, CIRCLE_BRANCH ]
+              - equal: [ master, << pipeline.git.branch >> ]
+              - equal: [ main, << pipeline.git.branch >> ]
           steps:
             - tag-with-latest:
                 image: <<parameters.image>>
