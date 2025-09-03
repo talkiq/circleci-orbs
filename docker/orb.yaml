@@ -112,6 +112,8 @@ commands:
               docker tag \
                 "<<parameters.local_image_name>>" \
                 "<<parameters.registry>>/<<parameters.image>>:latest"
+            else
+              echo "Not tagging with latest"
             fi
 
   tag-with-commit:
