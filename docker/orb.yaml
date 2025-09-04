@@ -108,8 +108,8 @@ commands:
       - when: # Added condition for tag-with-latest
           condition:
             or:
-              - equal: [ master, << pipeline.git.branch >> ]
-              - equal: [ main, << pipeline.git.branch >> ]
+              - equal: [ master, << pipeline.git.branch >><< pipeline.git.tag >> ]
+              - equal: [ main, << pipeline.git.branch >><< pipeline.git.tag >> ]
           steps:
             - tag-with-latest:
                 image: <<parameters.image>>
