@@ -36,7 +36,7 @@ repos:
 
 # json
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.34.0
+  rev: 0.33.3
   hooks:
     - id: check-github-workflows
     - id: check-renovate
