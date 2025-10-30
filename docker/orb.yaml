@@ -108,7 +108,7 @@ commands:
       - run: # Added condition for tag-with-latest
           name: docker tag (latest)
           command: |
-            if [[ "${CIRCLE_BRANCH}" == "main" || "${CIRCLE_BRANCH}" == "master"]]; then
+            if [[ "${CIRCLE_BRANCH}" == "main" || "${CIRCLE_BRANCH}" == "master" ]]; then
               docker tag \
                 "<<parameters.local_image_name>>" \
                 "<<parameters.registry>>/<<parameters.image>>:latest"
