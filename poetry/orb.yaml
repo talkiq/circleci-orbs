@@ -98,8 +98,15 @@ jobs:
         description: >
           Extra flags to add to `poetry install` command.
         type: string
+      version:
+        default: latest
+        description: >
+          Specify the version of poetry to use. Must be either an "x.y.z"
+          version or "latest".
+        type: string
     steps:
-      - install
+      - install:
+          version: <<parameters.version>>
       - steps: <<parameters.configure_poetry>>
       - checkout
       - run:
