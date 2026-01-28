@@ -592,4 +592,4 @@ jobs:
 
 orbs:
   docker: talkiq/docker@4.1.2
-  poetry: talkiq/poetry@4.1.0
+  poetry: talkiq/poetry@4.2.0
