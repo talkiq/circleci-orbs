@@ -2,7 +2,7 @@ version: 2.1
 description: "Tools for notifying external services about CI events"
 
 orbs:
-  slack: circleci/slack@6.1.2
+  slack: circleci/slack@6.1.3
 
 executors:
   alpine-latest:
