@@ -26,6 +26,10 @@ commands:
         default: ""
         description: The Google project ID to connect with via the gcloud CLI.
         type: string
+      region:
+        default: ""
+        description: The Google region to use via the gcloud CLI.
+        type: string
       zone:
         default: ""
         description: The Google zone to use via the gcloud CLI.
@@ -38,9 +42,13 @@ commands:
           steps:
             - run: gcloud --quiet config set project "<<parameters.project>>"
       - when:
+          condition: <<parameters.region>>
+          steps:
+            - run: gcloud --quiet config set compute/region "<<parameters.region>>"
+      - when:
           condition: <<parameters.zone>>
           steps:
-            - run: gcloud --quiet config set zone "<<parameters.zone>>"
+            - run: gcloud --quiet config set compute/zone "<<parameters.zone>>"
 
   configure-docker:
     description: >
