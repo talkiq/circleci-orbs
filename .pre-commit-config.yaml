@@ -43,3 +43,9 @@ repos:
       additional_dependencies:
       # renovate: datasource=pypi depName=pyjson5
       - pyjson5==1.6.9
+
+# yaml
+- repo: https://github.com/adrienverge/yamllint
+  rev: v1.38.0
+  hooks:
+    - id: yamllint
