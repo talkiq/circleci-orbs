@@ -48,13 +48,13 @@ the purpose of testing:
     - poetry: talkiq/poetry@4
     + poetry: talkiq/poetry@dev:628e28f
 
-Once your PR has been merged, you can release a new version of any orb by force
-push the tag corresponding to that orb and the given release type:
-``${ORBNAME}-{major,minor,patch}``. For example:
+Once your PR has been merged, you can release a new version of any orb by
+pushing a semver tag for that orb in the following format:
+``${ORBNAME}-vMAJOR.MINOR.PATCH``. For example:
 
 .. code-block:: bash
 
-    git tag -f talkiq/linter-patch && git push -f origin talkiq/linter-patch
+    git tag talkiq/linter-v4.2.0 && git push origin talkiq/linter-v4.2.0
 
 Please be sure to do this only off of commits on master! The `dev versions`_
 described above should be enough for testing your changes pre-merge.
