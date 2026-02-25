@@ -20,34 +20,34 @@ workflows:
               only: /.*/
 
       - orb-tools/lint:
-          name: lint-orbs-<<matrix.orb>>
+          name: lint-orbs-<<matrix.source_dir>>
           matrix:
             parameters:
-              orb: [docker, gcloud, linter, notifier, poetry]
-          source_dir: <<matrix.orb>>
+              source_dir: [docker, gcloud, linter, notifier, poetry]
+          source_dir: <<matrix.source_dir>>
           filters:
             tags:
               only: /.*/
 
       - orb-tools/pack:
-          name: pack-orbs-<<matrix.orb>>
+          name: pack-orbs-talkiq/<<matrix.source_dir>>
           matrix:
             parameters:
-              orb: [docker, gcloud, linter, notifier, poetry]
-          source_dir: <<matrix.orb>>
+              source_dir: [docker, gcloud, linter, notifier, poetry]
+          source_dir: <<matrix.source_dir>>
           filters:
             tags:
               only: /.*/
           requires:
             - linter/pre-commit
-            - lint-orbs-<<matrix.orb>>
+            - lint-orbs-<<matrix.source_dir>>
 
       - orb-tools/publish:
-          name: publish-dev-orbs-<<matrix.orb>>
+          name: publish-dev-orbs-<<matrix.orb_name>>
           matrix:
             parameters:
-              orb: [docker, gcloud, linter, notifier, poetry]
-          orb_name: talkiq/<<matrix.orb>>
+              orb_name: [talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry]
+          orb_name: <<matrix.orb_name>>
           pub_type: dev
           vcs_type: << pipeline.project.type >>
           filters:
@@ -56,21 +56,21 @@ workflows:
             tags:
               ignore: /.*/
           requires:
-            - pack-orbs-<<matrix.orb>>
+            - pack-orbs-<<matrix.orb_name>>
 
       - orb-tools/publish:
-          name: publish-prod-orbs-<<matrix.orb>>
+          name: publish-prod-orbs-<<matrix.orb_name>>
           matrix:
             parameters:
-              orb: [docker, gcloud, linter, notifier, poetry]
-          orb_name: talkiq/<<matrix.orb>>
+              orb_name: [talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry]
+          orb_name: <<matrix.orb_name>>
           pub_type: production
           vcs_type: << pipeline.project.type >>
-          tag_pattern: '^talkiq/<<matrix.orb>>-v[0-9]+\.[0-9]+\.[0-9]+$'
+          tag_pattern: '^<<matrix.orb_name>>-v[0-9]+\.[0-9]+\.[0-9]+$'
           filters:
             branches:
               ignore: /.*/
             tags:
-              only: /^talkiq\/<<matrix.orb>>-v[0-9]+\.[0-9]+\.[0-9]+$/
+              only: /^talkiq\/.+-v[0-9]+\.[0-9]+\.[0-9]+$/
           requires:
-            - pack-orbs-<<matrix.orb>>
+            - pack-orbs-<<matrix.orb_name>>
