@@ -23,7 +23,7 @@ workflows:
           name: lint-orbs-<<matrix.source_dir>>
           matrix:
             parameters:
-              source_dir: [docker, gcloud, linter, notifier, poetry]
+              source_dir: [docker, gcloud, image-status, linter, notifier, poetry]
           source_dir: <<matrix.source_dir>>
           filters:
             tags:
@@ -33,7 +33,7 @@ workflows:
           name: pack-orbs-talkiq/<<matrix.source_dir>>
           matrix:
             parameters:
-              source_dir: [docker, gcloud, linter, notifier, poetry]
+              source_dir: [docker, gcloud, image-status, linter, notifier, poetry]
           source_dir: <<matrix.source_dir>>
           filters:
             tags:
@@ -46,7 +46,7 @@ workflows:
           name: publish-dev-orbs-<<matrix.orb_name>>
           matrix:
             parameters:
-              orb_name: [talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry]
+              orb_name: [talkiq/docker, talkiq/gcloud, talkiq/image-status, talkiq/linter, talkiq/notifier, talkiq/poetry]
           orb_name: <<matrix.orb_name>>
           pub_type: dev
           vcs_type: << pipeline.project.type >>
@@ -62,7 +62,7 @@ workflows:
           name: publish-prod-orbs-<<matrix.orb_name>>
           matrix:
             parameters:
-              orb_name: [talkiq/docker, talkiq/gcloud, talkiq/linter, talkiq/notifier, talkiq/poetry]
+              orb_name: [talkiq/docker, talkiq/gcloud, talkiq/image-status, talkiq/linter, talkiq/notifier, talkiq/poetry]
           orb_name: <<matrix.orb_name>>
           pub_type: production
           vcs_type: << pipeline.project.type >>

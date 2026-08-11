@@ -1,0 +1,111 @@
+version: 2.1
+description: >
+  Aggregate per-image build status into a single stable CI check. For repos
+  that build many images via a matrix job (eg. using `variants`), each image
+  job records a start/success marker and a fan-in job fails (red, not
+  grey-pending) if any image build did not finish. Wire the fan-in job with
+  `requires: [<image-job>: terminal]` so it runs even when an image build
+  fails, giving one clickable red/green check instead of a stuck "Expected".
+
+executors:
+  alpine-latest:
+    docker:
+      - image: alpine:latest
+    resource_class: small
+
+commands:
+  mark-started:
+    description: >
+      Record that this image build has started. Run this as the FIRST step of
+      each image (matrix) job so the marker is persisted before any later step
+      can fail.
+    parameters:
+      variant:
+        description: >
+          Unique name for this image build (eg. the matrix variant). Slashes
+          are normalised to dashes for the marker filename.
+        type: string
+      workspace_dir:
+        default: /tmp/image-status
+        description: >
+          Shared workspace directory used to collect status markers. Must match
+          the value passed to `mark-done` and the `all-images-built` job.
+        type: string
+    steps:
+      - run:
+          name: Mark image build started
+          command: |
+            mkdir -p <<parameters.workspace_dir>>
+            touch "<<parameters.workspace_dir>>/$(echo '<<parameters.variant>>' | tr '/' '-').started"
+      - persist_to_workspace:
+          root: <<parameters.workspace_dir>>
+          paths: [.]
+
+  mark-done:
+    description: >
+      Record that this image build succeeded. Run this as the LAST step of each
+      image (matrix) job; it is only reached when the build succeeds.
+    parameters:
+      variant:
+        description: >
+          Unique name for this image build. Must match the value passed to
+          `mark-started` for the same job.
+        type: string
+      workspace_dir:
+        default: /tmp/image-status
+        description: >
+          Shared workspace directory used to collect status markers.
+        type: string
+    steps:
+      - run:
+          name: Mark image build succeeded
+          command: |
+            touch "<<parameters.workspace_dir>>/$(echo '<<parameters.variant>>' | tr '/' '-').done"
+      - persist_to_workspace:
+          root: <<parameters.workspace_dir>>
+          paths: [.]
+
+jobs:
+  all-images-built:
+    description: >
+      Fan-in gate posting a single stable `all-images-built` check. Wire it
+      with `requires: [<image-job>: terminal]` so it runs once every image job
+      reaches a final state (success/failed/canceled). Fails if any image that
+      recorded a `mark-started` marker did not record a matching `mark-done`,
+      listing the variants that failed.
+    executor: <<parameters.executor>>
+    parameters:
+      executor:
+        default: alpine-latest
+        description: >
+          Executor for the job. Must provide a POSIX shell (busybox is fine).
+          Defaults to a small alpine:latest docker image.
+        type: executor
+      workspace_dir:
+        default: /tmp/image-status
+        description: >
+          Shared workspace directory containing the status markers. Must match
+          the value passed to `mark-started` / `mark-done`.
+        type: string
+    steps:
+      - attach_workspace:
+          at: <<parameters.workspace_dir>>
+      - run:
+          name: Verify all images built
+          command: |
+            dir="<<parameters.workspace_dir>>"
+            started=$(ls "$dir"/*.started 2>/dev/null | wc -l | tr -d ' ')
+            done=$(ls "$dir"/*.done 2>/dev/null | wc -l | tr -d ' ')
+            if [ "$started" = "0" ]; then
+              echo "No image build markers found — cannot verify image builds"
+              exit 1
+            fi
+            if [ "$started" != "$done" ]; then
+              echo "Image build failures detected ($done/$started succeeded):"
+              for f in "$dir"/*.started; do
+                base="${f%.started}"
+                [ -f "${base}.done" ] || echo "  FAILED: $(basename "$base")"
+              done
+              exit 1
+            fi
+            echo "All $done images built successfully"
