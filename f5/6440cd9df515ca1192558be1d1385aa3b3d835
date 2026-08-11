@@ -1,0 +1,26 @@
+image-status/@orb.yml
+  s_f99b660c48eabf::t_6f07d3102dd9bb 1-111
+README.rst
+  s_f99b660c48eabf::t_5586b1c2e02a65 33
+  s_f99b660c48eabf::t_ea66fa165a8e4e 21
+  s_f99b660c48eabf::t_0b41ef4f79bc4e 75-78
+.circleci/config.yml
+  s_f99b660c48eabf::t_2fd97ce9c4ce19 26,36
+  s_f99b660c48eabf::t_c9efab4d399484 49,65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f56440cd9df515ca1192558be1d1385aa3b3d835",
+  "prompts": {},
+  "sessions": {
+    "s_f99b660c48eabf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "022f85af-0567-484f-9ebb-2d6687c968ab",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "“Violet <violetyang@dialpad.com>"
+    }
+  }
+}
