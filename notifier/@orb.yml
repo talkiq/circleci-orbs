@@ -139,6 +139,103 @@ jobs:
             -d '{"title": "'"<<parameters.title>>"'", "text": "'"<<parameters.text>>"'", "tags": ["'"<<parameters.tag>>"'"], "alert_type": "success"}' \
             "https://<<parameters.domain>>/api/v1/events?api_key=${<<parameters.api_key>>}"
 
+  grafana-on-deploy:
+    description: |
+      Marks a deployment on Grafana dashboards with an annotation linking to the
+      changeset and the build. Dashboards can show these with an annotation
+      query filtered on its tags.
+    executor: <<parameters.executor>>
+    parameters:
+      changes:
+        default: ''
+        description: |
+          The (optional) changelog for this release. Up to 10 lines are shown.
+        type: string
+      diff_url:
+        default: ${CIRCLE_COMPARE_URL}
+        description: |
+          A link to the changeset for this release. Links the commit when empty.
+        type: string
+      environment:
+        default: ${CIRCLE_TAG}
+        description: |
+          The environment being deployed.
+        type: string
+      executor:
+        default: alpine-latest
+        description: >
+          Executor for the job. Must be alpine-based. To use your own custom
+          executor, see
+          `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
+          Defaults to a small alpine:latest docker image.
+        type: executor
+      grafana_url:
+        description: |
+          Base URL of your Grafana instance, eg. https://example.grafana.net.
+        type: string
+      project:
+        default: ${CIRCLE_PROJECT_REPONAME}
+        description: |
+          The name of the project.
+        type: string
+      tags:
+        default: ''
+        description: |
+          Extra comma-separated tags for the annotation, which is always tagged
+          "deploy", the project and the environment.
+        type: string
+      token:
+        default: GRAFANA_TOKEN
+        description: |
+          Name of the environment variable containing a Grafana service account
+          token allowed to create annotations.
+        type: env_var_name
+      user:
+        default: "@${CIRCLE_USERNAME}"
+        description: |
+          User responsible for this release.
+        type: string
+      version:
+        default: ${CIRCLE_SHA1:0:10}
+        description: |
+          Newly-released version.
+        type: string
+    steps:
+      - run: apk add --no-cache --no-progress curl jq
+      - run: |
+          if [ -z "${<<parameters.token>>}" ]; then
+            echo "<<parameters.token>> is not set." >&2
+            exit 1
+          fi
+          diff_url="<<parameters.diff_url>>"
+          if [ -z "${diff_url}" ]; then
+            diff_url="https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commit/${CIRCLE_SHA1}"
+          fi
+          payload=$(jq -n \
+            --arg project "<<parameters.project>>" \
+            --arg env "<<parameters.environment>>" \
+            --arg tags "<<parameters.tags>>" \
+            --arg user "<<parameters.user>>" \
+            --arg version "<<parameters.version>>" \
+            --arg diff_url "${diff_url}" \
+            --arg build_url "${CIRCLE_BUILD_URL}" \
+            --arg changes "<<parameters.changes>>" \
+            '{
+              tags: (["deploy", $project, $env] + ($tags | split(",") | map(select(. != ""))) | unique),
+              text: (
+                "<b>\($project | @html)</b> \($version | @html) to \($env | @html) by \($user | @html)<br>"
+                + "<a href=\"\($diff_url | @html)\">changes</a> | <a href=\"\($build_url | @html)\">build</a>"
+                + ($changes | split("\n") | map(select(. != "")) | .[:10] | map("<br>" + @html) | join(""))
+              )
+            }')
+          # the token goes through stdin since curl's arguments are visible to
+          # other processes
+          printf 'Authorization: Bearer %s' "${<<parameters.token>>}" | curl -sS --fail --max-time 10 -XPOST \
+            -H @- \
+            -H "Content-Type: application/json" \
+            -d "${payload}" \
+            "<<parameters.grafana_url>>/api/annotations"
+
   sentry-deployment:
     description: |
       Creates a new release deployment in Sentry. Should be run after the release has been created.
