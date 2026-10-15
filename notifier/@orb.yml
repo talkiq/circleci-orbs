@@ -250,8 +250,6 @@ jobs:
   slack-on-deploy:
     description: |
       Uses thekevjames/slack-notifier to send a deployment notification to your workspace.
-      When a Grafana token is available, also marks the deploy on Grafana
-      dashboards, with links to the changes and the build.
     executor: <<parameters.executor>>
     parameters:
       changes:
@@ -277,17 +275,6 @@ jobs:
           `https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-executors`.
           Defaults to a small alpine:latest docker image.
         type: executor
-      grafana_token:
-        default: ${GRAFANA_DEPLOY_ANNOTATIONS_TOKEN}
-        description: |
-          Grafana service account token allowed to create annotations. The
-          Grafana deploy marker is skipped when empty.
-        type: string
-      grafana_url:
-        default: https://dialpad.grafana.net
-        description: |
-          Grafana instance to mark the deploy on.
-        type: string
       prev_version:
         default: unknown
         description: |
@@ -314,7 +301,7 @@ jobs:
           Destination webhook URL.
         type: string
     steps:
-      - run: apk add --no-cache --no-progress curl jq
+      - run: apk add --no-cache --no-progress curl
       - run: curl https://raw.githubusercontent.com/TheKevJames/tools/master/slack-notifier/send-deploy-notif.sh > /send-deploy-notif.sh
       - run: |
           sh /send-deploy-notif.sh \
@@ -326,44 +313,3 @@ jobs:
             -u "<<parameters.user>>" \
             -v "<<parameters.version>>" \
             -w "<<parameters.webhook>>"
-      - run: |
-          token="<<parameters.grafana_token>>"
-          if [ -z "${token}" ]; then
-            echo "No Grafana token set, not marking the deploy on dashboards."
-            exit 0
-          fi
-          # dashboards filter on their GCP project, which deploys only know by
-          # environment name
-          case "<<parameters.environment>>" in
-            staging) gcp_project=voiceai-staging ;;
-            production) gcp_project=talkiq-echelon ;;
-            *) gcp_project="<<parameters.environment>>" ;;
-          esac
-          diff_url="<<parameters.diff_url>>"
-          if [ -z "${diff_url}" ]; then
-            diff_url="https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commit/${CIRCLE_SHA1}"
-          fi
-          payload=$(jq -n \
-            --arg project "<<parameters.project>>" \
-            --arg env "<<parameters.environment>>" \
-            --arg gcp_project "${gcp_project}" \
-            --arg user "<<parameters.user>>" \
-            --arg prev "<<parameters.prev_version>>" \
-            --arg version "<<parameters.version>>" \
-            --arg diff_url "${diff_url}" \
-            --arg build_url "${CIRCLE_BUILD_URL}" \
-            --arg changes "<<parameters.changes>>" \
-            '{
-              tags: (["deploy", $project, $env, $gcp_project] | unique),
-              text: (
-                "<b>\($project | @html)</b> \($prev | @html)..\($version | @html) to \($env | @html) by \($user | @html)<br>"
-                + "<a href=\"\($diff_url | @html)\">changes</a> | <a href=\"\($build_url | @html)\">build</a>"
-                + ($changes | split("\n") | map(select(. != "")) | .[:10] | map("<br>" + @html) | join(""))
-              )
-            }')
-          curl -sS --fail --max-time 10 -XPOST \
-            -H "Authorization: Bearer ${token}" \
-            -H "Content-Type: application/json" \
-            -d "${payload}" \
-            "<<parameters.grafana_url>>/api/annotations" \
-            || echo "Could not mark the deploy on Grafana dashboards, continuing."
