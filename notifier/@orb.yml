@@ -142,19 +142,17 @@ jobs:
   grafana-on-deploy:
     description: |
       Marks a deployment on Grafana dashboards with an annotation linking to the
-      changeset and the build. Dashboards can show these with an annotation
-      query filtered on its tags.
+      pull requests it ships (found as "(#123)" in commit subjects, as squash
+      merges leave them), or to the commit when there are none. Dashboards can
+      show these with an annotation query filtered on its tags.
     executor: <<parameters.executor>>
     parameters:
       changes:
         default: ''
         description: |
-          The (optional) changelog for this release. Up to 10 lines are shown.
-        type: string
-      diff_url:
-        default: ${CIRCLE_COMPARE_URL}
-        description: |
-          A link to the changeset for this release. Links the commit when empty.
+          Subjects of the commits in this release, one per line, eg.
+          $(git log --pretty=format:'%s' previous..${CIRCLE_SHA1}). Evaluated by
+          the shell. Pull requests are found from their "(#123)" suffixes.
         type: string
       environment:
         default: ${CIRCLE_TAG}
@@ -190,15 +188,10 @@ jobs:
           Name of the environment variable containing a Grafana service account
           token allowed to create annotations.
         type: env_var_name
-      user:
-        default: "@${CIRCLE_USERNAME}"
-        description: |
-          User responsible for this release.
-        type: string
       version:
         default: ${CIRCLE_SHA1:0:10}
         description: |
-          Newly-released version.
+          Newly-released version, shown when no pull request is found.
         type: string
     steps:
       - run: apk add --no-cache --no-progress curl jq
@@ -207,27 +200,26 @@ jobs:
             echo "<<parameters.token>> is not set." >&2
             exit 1
           fi
-          diff_url="<<parameters.diff_url>>"
-          if [ -z "${diff_url}" ]; then
-            diff_url="https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commit/${CIRCLE_SHA1}"
-          fi
+          repo_url="https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
           payload=$(jq -n \
             --arg project "<<parameters.project>>" \
             --arg env "<<parameters.environment>>" \
             --arg tags "<<parameters.tags>>" \
-            --arg user "<<parameters.user>>" \
             --arg version "<<parameters.version>>" \
-            --arg diff_url "${diff_url}" \
-            --arg build_url "${CIRCLE_BUILD_URL}" \
+            --arg repo_url "${repo_url}" \
+            --arg sha "${CIRCLE_SHA1}" \
             --arg changes "<<parameters.changes>>" \
-            '{
-              tags: (["deploy", $project, $env] + ($tags | split(",") | map(select(. != ""))) | unique),
-              text: (
-                "<b>\($project | @html)</b> \($version | @html) to \($env | @html) by \($user | @html)<br>"
-                + "<a href=\"\($diff_url | @html)\">changes</a> | <a href=\"\($build_url | @html)\">build</a>"
-                + ($changes | split("\n") | map(select(. != "")) | .[:10] | map("<br>" + @html) | join(""))
-              )
-            }')
+            '([$changes | split("\n")[] | capture("\\(#(?<n>[0-9]+)\\)\\s*$")? | .n] | unique_by(tonumber)) as $prs
+            | {
+                tags: (["deploy", $project, $env] + ($tags | split(",") | map(select(. != ""))) | unique),
+                text: (
+                  "<b>\($project | @html)</b> to \($env | @html): "
+                  + (if ($prs | length) > 0
+                     then ($prs | map("<a href=\"\($repo_url)/pull/\(.)\">#\(.)</a>") | join(", "))
+                     else "<a href=\"\($repo_url)/commit/\($sha)\">\($version | @html)</a>"
+                     end)
+                )
+              }')
           # the token goes through stdin since curl's arguments are visible to
           # other processes
           printf 'Authorization: Bearer %s' "${<<parameters.token>>}" | curl -sS --fail --max-time 10 -XPOST \
