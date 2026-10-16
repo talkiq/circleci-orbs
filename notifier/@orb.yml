@@ -143,7 +143,8 @@ jobs:
     description: |
       Marks a deployment on Grafana dashboards with an annotation linking to the
       pull requests it ships (found as "(#123)" in commit subjects, as squash
-      merges leave them), or to the commit when there are none. Dashboards can
+      merges leave them), or to the commit when there are none. With a start
+      time, it's drawn as a window from then until the job runs. Dashboards can
       show these with an annotation query filtered on its tags.
     executor: <<parameters.executor>>
     parameters:
@@ -151,7 +152,8 @@ jobs:
         default: ''
         description: |
           Subjects of the commits in this release, one per line, eg.
-          $(git log --pretty=format:'%s' previous..${CIRCLE_SHA1}). Evaluated by
+          $(git log --pretty=format:'%s' previous..${CIRCLE_SHA1}), which needs
+          the repository checked out (eg. with a checkout pre-step). Evaluated by
           the shell. Pull requests are found from their "(#123)" suffixes.
         type: string
       environment:
@@ -175,6 +177,13 @@ jobs:
         default: ${CIRCLE_PROJECT_REPONAME}
         description: |
           The name of the project.
+        type: string
+      start:
+        default: ''
+        description: |
+          When the deployment started, in seconds since the epoch. If set, the
+          annotation spans from then until now, so run this once the rollout
+          has finished. Evaluated by the shell.
         type: string
       tags:
         default: ''
@@ -208,9 +217,10 @@ jobs:
             --arg version "<<parameters.version>>" \
             --arg repo_url "${repo_url}" \
             --arg sha "${CIRCLE_SHA1}" \
+            --arg start "<<parameters.start>>" \
             --arg changes "<<parameters.changes>>" \
             '([$changes | split("\n")[] | capture("\\(#(?<n>[0-9]+)\\)\\s*$")? | .n] | unique_by(tonumber)) as $prs
-            | {
+            | (if $start == "" then {} else {time: ($start | tonumber * 1000), timeEnd: (now * 1000 | floor)} end) + {
                 tags: (["deploy", $project, $env] + ($tags | split(",") | map(select(. != ""))) | unique),
                 text: (
                   "<b>\($project | @html)</b> to \($env | @html): "
