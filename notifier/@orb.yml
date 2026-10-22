@@ -348,7 +348,7 @@ jobs:
 
   slack-on-deploy:
     description: |
-      Uses thekevjames/slack-notifier to send a deployment notification to your workspace.
+      Send a deployment notification to your workspace.
     executor: <<parameters.executor>>
     parameters:
       changes:
@@ -408,14 +408,17 @@ jobs:
     steps:
       - run: apk add --no-cache --no-progress curl
       - run:
+          name: Prepare deploy notification
+          command: |
+            mkdir -p /tmp/notifier-params
+            printf '%s' "<<parameters.changes>>" > /tmp/notifier-params/CHANGES
+            printf '%s' "<<parameters.diff_url>>" > /tmp/notifier-params/DIFF_URL
+            printf '%s' "<<parameters.environment>>" > /tmp/notifier-params/ENVIRONMENT
+            printf '%s' "<<parameters.project>>" > /tmp/notifier-params/NAME
+            printf '%s' "<<parameters.prev_version>>" > /tmp/notifier-params/PREVIOUS
+            printf '%s' "<<parameters.user>>" > /tmp/notifier-params/USER
+            printf '%s' "<<parameters.version>>" > /tmp/notifier-params/VERSION
+            printf '%s' "<<parameters.webhook>>" > /tmp/notifier-params/WEBHOOK
+      - run:
           name: Send deploy notification
-          environment:
-            CHANGES: <<parameters.changes>>
-            DIFF_URL: <<parameters.diff_url>>
-            ENVIRONMENT: <<parameters.environment>>
-            NAME: <<parameters.project>>
-            PREVIOUS: <<parameters.prev_version>>
-            USER: <<parameters.user>>
-            VERSION: <<parameters.version>>
-            WEBHOOK: <<parameters.webhook>>
           command: <<include(send-deploy-notif.sh)>>

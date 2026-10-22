@@ -1,15 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# caller-provided values (eg. via the notifier orb) fall back to CircleCI
-# built-ins when unset
+# caller-provided values are resolved (with shell expansion) by the orb's
+# preceding "Prepare deploy notification" step and written to these files,
+# since this step's command must be a bare `<<include(...)>>` and so can't
+# itself expand eg. `$(...)`/`${...}` expressions passed in as parameters.
+# Fall back to CircleCI built-ins when unset.
+param() {
+    local file="/tmp/notifier-params/${1}"
+    [[ -f "${file}" ]] && cat "${file}"
+}
+
+CHANGES="$(param CHANGES)"
 CHANGES="${CHANGES//\"/}"
+DIFF_URL="$(param DIFF_URL)"
 DIFF_URL="${DIFF_URL:-${CIRCLE_COMPARE_URL:-}}"
+ENVIRONMENT="$(param ENVIRONMENT)"
 ENVIRONMENT="${ENVIRONMENT:-${CIRCLE_TAG:-}}"
+NAME="$(param NAME)"
 NAME="${NAME:-${CIRCLE_PROJECT_REPONAME:-}}"
+PREVIOUS="$(param PREVIOUS)"
 PREVIOUS="${PREVIOUS:-unknown}"
+USER="$(param USER)"
 USER="${USER:-@${CIRCLE_USERNAME:-}}"
+VERSION="$(param VERSION)"
 VERSION="${VERSION:-${CIRCLE_SHA1:0:10}}"
+WEBHOOK="$(param WEBHOOK)"
 WEBHOOK="${WEBHOOK:-${SLACK_DEPLOYBOT_WEBHOOK:-}}"
 
 # verify set
