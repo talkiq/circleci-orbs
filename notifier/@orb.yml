@@ -348,7 +348,7 @@ jobs:
 
   slack-on-deploy:
     description: |
-      Uses thekevjames/slack-notifier to send a deployment notification to your workspace.
+      Send a deployment notification to your workspace.
     executor: <<parameters.executor>>
     parameters:
       changes:
@@ -357,14 +357,16 @@ jobs:
           The (optional) changelog for this release.
         type: string
       diff_url:
-        default: ${CIRCLE_COMPARE_URL}
+        default: ''
         description: |
-          A link to the changeset for this release.
+          A link to the changeset for this release. Defaults to CircleCI's
+          own compare URL for this build.
         type: string
       environment:
-        default: ${CIRCLE_TAG}
+        default: ''
         description: |
-          The environment being deployed.
+          The environment being deployed. Defaults to the CircleCI tag
+          triggering this build.
         type: string
       executor:
         default: alpine-latest
@@ -380,35 +382,43 @@ jobs:
           Previously-released version.
         type: string
       project:
-        default: ${CIRCLE_PROJECT_REPONAME}
+        default: ''
         description: |
-          The name of the project.
+          The name of the project. Defaults to CircleCI's own project name
+          for this build.
         type: string
       user:
-        default: "@${CIRCLE_USERNAME}"
+        default: ''
         description: |
-          User responsible for this release.
+          User responsible for this release. Defaults to `@` followed by
+          the CircleCI username that triggered this build.
         type: string
       version:
-        default: ${CIRCLE_SHA1:0:10}
+        default: ''
         description: |
-          Newly-released version.
+          Newly-released version. Defaults to the first 10 characters of
+          CircleCI's own commit SHA for this build.
         type: string
       webhook:
-        default: ${SLACK_DEPLOYBOT_WEBHOOK}
+        default: ''
         description: |
-          Destination webhook URL.
+          Destination webhook URL. Defaults to the ${SLACK_DEPLOYBOT_WEBHOOK}
+          environment variable.
         type: string
     steps:
       - run: apk add --no-cache --no-progress curl
-      - run: curl https://raw.githubusercontent.com/TheKevJames/tools/master/slack-notifier/send-deploy-notif.sh > /send-deploy-notif.sh
-      - run: |
-          sh /send-deploy-notif.sh \
-            -c "<<parameters.changes>>" \
-            -d "<<parameters.diff_url>>" \
-            -e "<<parameters.environment>>" \
-            -n "<<parameters.project>>" \
-            -p "<<parameters.prev_version>>" \
-            -u "<<parameters.user>>" \
-            -v "<<parameters.version>>" \
-            -w "<<parameters.webhook>>"
+      - run:
+          name: Prepare deploy notification
+          command: |
+            mkdir -p /tmp/notifier-params
+            printf '%s' "<<parameters.changes>>" > /tmp/notifier-params/CHANGES
+            printf '%s' "<<parameters.diff_url>>" > /tmp/notifier-params/DIFF_URL
+            printf '%s' "<<parameters.environment>>" > /tmp/notifier-params/ENVIRONMENT
+            printf '%s' "<<parameters.project>>" > /tmp/notifier-params/NAME
+            printf '%s' "<<parameters.prev_version>>" > /tmp/notifier-params/PREVIOUS
+            printf '%s' "<<parameters.user>>" > /tmp/notifier-params/USER
+            printf '%s' "<<parameters.version>>" > /tmp/notifier-params/VERSION
+            printf '%s' "<<parameters.webhook>>" > /tmp/notifier-params/WEBHOOK
+      - run:
+          name: Send deploy notification
+          command: <<include(send-deploy-notif.sh)>>
