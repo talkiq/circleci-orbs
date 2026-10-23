@@ -1,0 +1,53 @@
+version: 2.1
+
+description: Plan or release inference cells with inference-platform's prebuilt tooling.
+
+orbs:
+  gcloud: talkiq/gcloud@12.4.1
+
+jobs:
+  release-cell:
+    description: Plan or release a caller-owned inference cell.
+    parameters:
+      tool-image:
+        description: Full tool image reference pinned with @sha256 to a registry digest.
+        type: string
+      project:
+        description: Google Cloud project that owns the inference cell.
+        type: string
+      cell-dir:
+        description: Directory containing cell.yaml in the caller repository.
+        type: string
+      action:
+        description: Plan without changing Vertex state, or apply a release.
+        type: enum
+        enum: [plan, release]
+    docker:
+      - image: << parameters.tool-image >>
+        auth:
+          username: _json_key_base64
+          password: $GCLOUD_SERVICE_KEY
+    resource_class: small
+    environment:
+      ACTION: << parameters.action >>
+      CELL_DIR: << parameters.cell-dir >>
+      CLOUDSDK_CORE_PROJECT: << parameters.project >>
+      GOOGLE_CLOUD_PROJECT: << parameters.project >>
+      GOOGLE_APPLICATION_CREDENTIALS: /key.json
+    steps:
+      - checkout
+      - gcloud/auth:
+          project: << parameters.project >>
+      - run:
+          name: Validate the cell and its endpoints
+          command: inference-release validate-cell "$CELL_DIR" --live
+      - run:
+          name: Run the release action
+          no_output_timeout: 2h
+          command: |
+            set -euo pipefail
+            case "$ACTION" in
+              plan) inference-release plan-release "$CELL_DIR" ;;
+              release) inference-release release-cell "$CELL_DIR" --apply ;;
+              *) echo "unknown action: $ACTION" >&2; exit 2 ;;
+            esac

@@ -18,6 +18,7 @@ Simply include the ``orb`` or ``orbs`` you're interested in within your
     orbs:
       docker: talkiq/docker@1
       gcloud: talkiq/gcloud@1
+      inference-platform: talkiq/inference-platform@0.1.0
       linter: talkiq/linter@1
       notifier: talkiq/notifier@1
       poetry: talkiq/poetry@1
@@ -29,6 +30,7 @@ Latest Versions
 
 * ``talkiq/docker``: |docker|
 * ``talkiq/gcloud``: |gcloud|
+* ``talkiq/inference-platform``: |inference-platform|
 * ``talkiq/linter``: |linter|
 * ``talkiq/notifier``: |notifier|
 * ``talkiq/poetry``: |poetry|
@@ -73,6 +75,10 @@ should be formatted as, eg. ``"talkiq/linter"``.
 .. |linter| image:: https://badges.circleci.com/orbs/talkiq/linter.svg
     :alt: Latest Version
     :target: https://circleci.com/orbs/registry/orb/talkiq/linter
+
+.. |inference-platform| image:: https://badges.circleci.com/orbs/talkiq/inference-platform.svg
+    :alt: Latest Version
+    :target: https://circleci.com/orbs/registry/orb/talkiq/inference-platform
 
 .. |notifier| image:: https://badges.circleci.com/orbs/talkiq/notifier.svg
     :alt: Latest Version
